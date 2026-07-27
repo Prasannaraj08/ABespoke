@@ -1,0 +1,34 @@
+[
+  {
+    "id": "u1",
+    "name": "John Doe",
+    "email": "customer@example.com",
+    "passwordHash": "$2a$10$mfpSXtX2em907fsi93/whefkSpa8JipJC2Ve8te9sllQJKvh5HRjS",
+    "role": "user",
+    "createdAt": "2026-07-01T11:12:54.291Z"
+  },
+  {
+    "id": "u2",
+    "name": "Admin Manager",
+    "email": "abespokeadmin@example.com",
+    "passwordHash": "$2a$10$oF1vkayvpEbAKcT7d1VJfOzxJkHQHEit1HGcqNYcRso7A86dqI.tq",
+    "role": "admin",
+    "createdAt": "2026-07-01T11:12:54.292Z"
+  },
+  {
+    "id": "u3",
+    "name": "ABespoke Boutique",
+    "email": "boutique@example.com",
+    "passwordHash": "$2a$10$ohJ1KbK0quPGrLIuWxTJB.4j8x5FWbxSHSry0AmlQI5wpj/awTr4O",
+    "role": "boutique",
+    "createdAt": "2026-07-01T11:12:54.292Z"
+  },
+  {
+    "id": "u4",
+    "name": "Sabyasachi Label",
+    "email": "designer@example.com",
+    "passwordHash": "$2a$10$TMd691orB4NCSJXpqvqeLOCRSdLj9VhNkSSFxkv/8nTYhcnOWVwWy",
+    "role": "designer",
+    "createdAt": "2026-07-01T11:12:54.292Z"
+  }
+]

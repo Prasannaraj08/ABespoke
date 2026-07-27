@@ -1,0 +1,23 @@
+[
+  {
+    "code": "FASHION10",
+    "discountPercent": 10,
+    "maxDiscount": 500,
+    "minOrderAmount": 1000,
+    "expiryDate": "2028-12-31"
+  },
+  {
+    "code": "PREMIUM20",
+    "discountPercent": 20,
+    "maxDiscount": 1500,
+    "minOrderAmount": 3000,
+    "expiryDate": "2028-12-31"
+  },
+  {
+    "code": "FESTIVE30",
+    "discountPercent": 30,
+    "maxDiscount": 3000,
+    "minOrderAmount": 5000,
+    "expiryDate": "2028-12-31"
+  }
+]

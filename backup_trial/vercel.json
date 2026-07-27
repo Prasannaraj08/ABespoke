@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "buildCommand": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+  "outputDirectory": "frontend/dist",
+  "functions": {
+    "api/server.ts": {
+      "maxDuration": 30,
+      "includeFiles": "backend/data/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/server" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
