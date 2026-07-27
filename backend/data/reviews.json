@@ -1,0 +1,29 @@
+[
+  {
+    "id": "r1",
+    "productId": "m_shirt_1",
+    "userId": "u1",
+    "userName": "John Doe",
+    "rating": 5,
+    "comment": "Absolutely amazing fit and premium fabric! Feels incredibly smooth and has a nice weight to it. Will buy more colors soon.",
+    "createdAt": "2026-07-01T10:31:28.426Z"
+  },
+  {
+    "id": "r2",
+    "productId": "m_shirt_1",
+    "userId": "u2",
+    "userName": "Alex Carter",
+    "rating": 4,
+    "comment": "Nice shirt, runs slightly tight on the shoulders but the overall stitching quality is excellent.",
+    "createdAt": "2026-07-01T10:31:28.426Z"
+  },
+  {
+    "id": "r3",
+    "productId": "w_saree_1",
+    "userId": "u1",
+    "userName": "Jessica Miller",
+    "rating": 5,
+    "comment": "Stunning silk Saree! Handloom weaving details are gorgeous. High-end look for family gatherings.",
+    "createdAt": "2026-07-01T10:31:28.426Z"
+  }
+]

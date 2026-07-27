@@ -1,0 +1,21 @@
+[
+  {
+    "userId": "u3",
+    "boutiqueName": "ABespoke Boutique",
+    "about": "Premium boutique collection featuring modern trends and classical fabrics.",
+    "address": "101 Fashion Blvd, Mumbai",
+    "contactNumber": "+91 98765 43210",
+    "email": "boutique@example.com",
+    "socialLinks": {
+      "instagram": "@abespoke.luxe",
+      "facebook": "abespokeluxefashion"
+    },
+    "businessHours": "10:00 AM - 08:30 PM",
+    "experienceYears": 8,
+    "specialization": "Bridal & Party Wear",
+    "verified": true,
+    "deliveryOptions": "Standard Courier, Next Day Dispatch",
+    "pricingPolicy": "Standard Retail",
+    "followersCount": 142
+  }
+]

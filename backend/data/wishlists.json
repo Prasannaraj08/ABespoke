@@ -1,0 +1,21 @@
+[
+  {
+    "userId": "u4",
+    "productIds": []
+  },
+  {
+    "userId": "u3",
+    "productIds": []
+  },
+  {
+    "userId": "u2",
+    "productIds": []
+  },
+  {
+    "userId": "u1",
+    "productIds": [
+      "m_hoodie_2",
+      "w_halfsaree_1"
+    ]
+  }
+]

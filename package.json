@@ -1,0 +1,19 @@
+{
+  "name": "premium-fashion-ecommerce",
+  "version": "1.0.0",
+  "description": "Premium Fashion E-Commerce Platform inspired by Myntra",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "start": "npm run dev:backend"
+  },
+  "dependencies": {
+    "pg": "^8.11.5",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.8"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
