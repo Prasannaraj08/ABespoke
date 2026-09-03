@@ -12,24 +12,26 @@
   --color-luxury-success: #16A34A;
   --color-luxury-error: #DC2626;
 
-  --font-serif: "Playfair Display", serif;
-  --font-sans: "Inter", sans-serif;
-  --font-btn: "Manrope", sans-serif;
+  --font-serif: "Constantia", Georgia, serif;
+  --font-sans: "Yu Gothic UI Semibold", "Yu Gothic UI", "Yu Gothic", sans-serif;
+  --font-btn: "Yu Gothic UI Semibold", "Yu Gothic UI", sans-serif;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Yu Gothic UI Semibold', 'Yu Gothic UI', 'Yu Gothic', sans-serif;
+  font-weight: 600;
   background-color: #F8F6F2;
   color: #1F2937;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Constantia', Georgia, serif;
 }
 
 button, .btn-luxury {
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Yu Gothic UI Semibold', 'Yu Gothic UI', sans-serif;
+  font-weight: 600;
 }
 
 /* Glassmorphism Utilities */

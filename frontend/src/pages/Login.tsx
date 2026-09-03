@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, CheckCircle, Sparkles, User, ShoppingBag, Palette, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, AlertCircle, CheckCircle, User, ShoppingBag, Palette, ArrowLeft, KeyRound, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login, googleLoginSim } = useAuth();
+  const { login } = useAuth();
 
   const paramEmail = searchParams.get('email') || '';
   const paramRole = searchParams.get('role') as 'user' | 'boutique' | 'designer' | 'admin' | null;
@@ -33,24 +34,22 @@ export const Login: React.FC = () => {
 
   const redirect = searchParams.get('redirect') || '';
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeLogin = async (loginEmail: string, loginPass: string, roleHint?: string) => {
     setError('');
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(loginEmail, loginPass);
       const userStr = localStorage.getItem('clara_luxe_user');
       const user = userStr ? JSON.parse(userStr) : null;
-      const role = user?.role || selectedRole;
+      const role = user?.role || roleHint || selectedRole;
 
       if (role === 'admin') navigate('/admin');
       else if (role === 'boutique') navigate('/boutique');
       else if (role === 'designer') navigate('/designer');
       else {
         if (redirect === 'checkout') navigate('/checkout');
-        else if (redirect === 'dashboard') navigate('/dashboard');
-        else navigate('/');
+        else navigate('/dashboard'); // Direct customers to dashboard upon sign-in
       }
     } catch (err: any) {
       setError(err);
@@ -59,29 +58,33 @@ export const Login: React.FC = () => {
     }
   };
 
-  const handleGoogleLoginSim = async () => {
-    setError('');
-    try {
-      await googleLoginSim('John Google Doe', 'john.doe.google@gmail.com');
-      if (redirect === 'checkout') navigate('/checkout');
-      else if (redirect === 'dashboard') navigate('/dashboard');
-      else navigate('/');
-    } catch (err: any) {
-      setError(err);
-    }
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await executeLogin(email, password);
   };
 
-  const handleQuickFill = () => {
-    if (selectedRole === 'boutique') {
-      setEmail('boutique@example.com');
-      setPassword('BT@123');
-    } else if (selectedRole === 'designer') {
-      setEmail('designer@example.com');
-      setPassword('password');
+  const handleInstantDemoLogin = (demoRole: 'user' | 'boutique' | 'designer' | 'admin') => {
+    let demoEmail = '';
+    let demoPass = '';
+
+    if (demoRole === 'designer') {
+      demoEmail = 'designer@example.com';
+      demoPass = 'password';
+    } else if (demoRole === 'boutique') {
+      demoEmail = 'boutique@example.com';
+      demoPass = 'BT@123';
+    } else if (demoRole === 'admin') {
+      demoEmail = 'abespokeadmin@example.com';
+      demoPass = 'CLARA@17';
     } else {
-      setEmail('customer@example.com');
-      setPassword('password123');
+      demoEmail = 'customer@example.com';
+      demoPass = 'password123';
     }
+
+    setEmail(demoEmail);
+    setPassword(demoPass);
+    setSelectedRole(demoRole);
+    executeLogin(demoEmail, demoPass, demoRole);
   };
 
   const getRoleTitle = () => {
@@ -129,13 +132,51 @@ export const Login: React.FC = () => {
         {/* Right Side: Interactive Login Portal */}
         <div className="lg:col-span-7 p-6 sm:p-10 md:p-12 flex flex-col justify-center space-y-6">
           
+          {/* Quick Demo Access Header Banner */}
+          <div className="bg-[#FAF9F5] border border-[#C79A4A]/25 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-[#C79A4A]">
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Instant 1-Click Demo Login</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => handleInstantDemoLogin('user')}
+                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
+              >
+                👤 Customer
+              </button>
+              <button
+                type="button"
+                onClick={() => handleInstantDemoLogin('designer')}
+                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
+              >
+                👗 Designer
+              </button>
+              <button
+                type="button"
+                onClick={() => handleInstantDemoLogin('boutique')}
+                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
+              >
+                🛍️ Boutique
+              </button>
+              <button
+                type="button"
+                onClick={() => handleInstantDemoLogin('admin')}
+                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
+              >
+                👑 Admin
+              </button>
+            </div>
+          </div>
+
           {/* Portal Selector Cards */}
           {!selectedRole ? (
             <div className="space-y-6">
               <div className="text-center space-y-2">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-[#C79A4A]">Secure Member Portal</span>
                 <h2 className="font-serif text-2xl md:text-3xl font-bold text-gray-900">Select Account Portal</h2>
-                <p className="text-xs text-gray-500 font-light max-w-sm mx-auto">Choose your signature role to enter specialized controls</p>
+                <p className="text-xs text-gray-500 font-light max-w-sm mx-auto">Choose your signature role or use 1-Click Demo Login above</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -243,49 +284,36 @@ export const Login: React.FC = () => {
                 </button>
               </form>
 
-              {/* Demo Quick Fill Buttons */}
-              {selectedRole === 'designer' ? (
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => { setEmail('designer@example.com'); setPassword('password'); }}
-                    className="border border-dashed border-[#C79A4A]/40 text-[#C79A4A] hover:bg-[#F5F3EF] text-[10px] uppercase font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
-                  >
-                    🔑 Designer Demo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setEmail('abespokeadmin@example.com'); setPassword('CLARA@17'); }}
-                    className="border border-dashed border-[#C79A4A]/40 text-[#C79A4A] hover:bg-[#F5F3EF] text-[10px] uppercase font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
-                  >
-                    🔑 Admin Demo
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleQuickFill}
-                  className="w-full border border-dashed border-[#C79A4A]/40 text-[#C79A4A] hover:bg-[#F5F3EF] text-[10px] uppercase font-bold py-2.5 rounded-xl transition-colors cursor-pointer"
-                >
-                  🔑 Click For Demo Credentials
-                </button>
-              )}
-
-              {/* Social Login */}
-              {selectedRole === 'user' && (
+              {/* Social Login under each respective role */}
+              {selectedRole !== 'admin' ? (
                 <>
                   <div className="relative flex py-2 items-center text-xs">
                     <div className="flex-grow border-t border-gray-200" />
                     <span className="flex-shrink mx-4 text-gray-400 uppercase font-bold text-[9px] tracking-wider">or sign in with</span>
                     <div className="flex-grow border-t border-gray-200" />
                   </div>
-                  <button
-                    onClick={handleGoogleLoginSim}
-                    className="w-full bg-white hover:bg-[#F5F3EF] border border-gray-200 text-gray-800 font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
-                  >
-                    <Sparkles className="w-4 h-4 text-[#C79A4A]" /> Continue with Google
-                  </button>
+                  <GoogleSignInButton
+                    role={selectedRole === 'boutique' ? 'boutique' : selectedRole === 'designer' ? 'designer' : 'user'}
+                    buttonText={
+                      selectedRole === 'boutique'
+                        ? 'Continue as Boutique with Google'
+                        : selectedRole === 'designer'
+                        ? 'Continue as Designer with Google'
+                        : 'Continue as Customer with Google'
+                    }
+                    className="w-full flex flex-col items-center"
+                  />
                 </>
+              ) : (
+                <div className="bg-amber-50/80 border border-amber-200 text-amber-900 p-3.5 rounded-xl text-xs space-y-1 mt-3">
+                  <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px] text-amber-800">
+                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <span>Restricted Administrator Access</span>
+                  </div>
+                  <p className="text-[11px] text-amber-800/90 font-light leading-relaxed">
+                    Google Sign-In is strictly disabled for Admin security. Only authorized credentials (<strong>tprraj2k8@gmail.com</strong> or demo credentials) are permitted.
+                  </p>
+                </div>
               )}
 
               <p className="text-center text-xs text-gray-500 font-light pt-2">

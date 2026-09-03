@@ -2,6 +2,12 @@ import { Router } from 'express';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import { authenticateToken } from '../middleware/auth';
+import { 
+  Product as ProductModel, 
+  BoutiqueProfile as BoutiqueProfileModel, 
+  DesignerProfile as DesignerProfileModel, 
+  User as UserModel 
+} from '../db/models';
 
 const router = Router();
 
@@ -87,28 +93,97 @@ router.post('/', authenticateToken, (req, res, next) => {
   }
 });
 
-// Delete image endpoint
-router.delete('/', authenticateToken, async (req, res) => {
+// Delete image endpoint with strict Role & Ownership Authorization (Fix for IDOR CWE-639)
+router.delete('/', authenticateToken, async (req: any, res) => {
   const { url, public_id } = req.body;
+  const user = req.user;
+
   if (!url && !public_id) {
     return res.status(400).json({ message: 'URL or public_id parameter is required' });
+  }
+
+  // 1. Regular customers are strictly forbidden from deleting Cloudinary assets
+  if (user.role === 'user') {
+    return res.status(403).json({ 
+      success: false, 
+      message: 'Access Denied: Customers are not permitted to delete media assets.',
+      errorCode: 4030 
+    });
   }
 
   try {
     let pid = public_id;
     if (!pid && url) {
-      // Extract public_id from Cloudinary URL
       const parts = url.split('/');
       const filenameWithExt = parts[parts.length - 1];
       const filename = filenameWithExt.split('.')[0];
       const folderIdx = parts.indexOf('clara-fashion');
       pid = folderIdx !== -1 ? `clara-fashion/${filename}` : filename;
     }
-    await cloudinary.uploader.destroy(pid);
-    res.status(200).json({ message: 'File deleted successfully' });
+
+    // 2. Prevent directory traversal or deleting non-clara-fashion root assets
+    if (!pid || (!pid.startsWith('clara-fashion/') && user.role !== 'admin')) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access Denied: Invalid or protected asset path.',
+        errorCode: 4030
+      });
+    }
+
+    // 3. Admin has global maintenance authorization
+    if (user.role === 'admin') {
+      await cloudinary.uploader.destroy(pid);
+      return res.status(200).json({ success: true, message: 'File deleted successfully by administrator' });
+    }
+
+    // 4. Designer: can only delete if asset belongs to their portfolio lookbook
+    if (user.role === 'designer') {
+      const profile = await DesignerProfileModel.findOne({ where: { userId: user.id } });
+      const images: string[] = profile?.portfolioImages || [];
+      const ownsAsset = images.some(img => img.includes(pid) || (url && img === url));
+
+      if (!ownsAsset) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You can only delete assets that belong to your designer portfolio.',
+          errorCode: 4030
+        });
+      }
+
+      await cloudinary.uploader.destroy(pid);
+      // Remove from portfolio array
+      const updatedImages = images.filter(img => !img.includes(pid) && (!url || img !== url));
+      await profile?.update({ portfolioImages: updatedImages });
+      return res.status(200).json({ success: true, message: 'Designer portfolio asset deleted successfully' });
+    }
+
+    // 5. Boutique: can only delete if asset belongs to their products or profile
+    if (user.role === 'boutique') {
+      const boutiqueUser = await UserModel.findByPk(user.id);
+      const boutiqueName = boutiqueUser?.name;
+
+      const ownsProductImage = boutiqueName ? await ProductModel.findOne({
+        where: { brand: boutiqueName }
+      }) : null;
+
+      // Check if this boutique owns the asset
+      const owns = ownsProductImage !== null;
+      if (!owns) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access Denied: You can only delete assets associated with your boutique.',
+          errorCode: 4030
+        });
+      }
+
+      await cloudinary.uploader.destroy(pid);
+      return res.status(200).json({ success: true, message: 'Boutique asset deleted successfully' });
+    }
+
+    return res.status(403).json({ success: false, message: 'Access Denied: Unauthorized deletion attempt.', errorCode: 4030 });
   } catch (err: any) {
     console.error('Cloudinary delete error:', err);
-    res.status(500).json({ message: 'Failed to delete file' });
+    return res.status(500).json({ success: false, message: 'Failed to delete file' });
   }
 });
 

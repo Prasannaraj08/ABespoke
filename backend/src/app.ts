@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -16,6 +16,7 @@ import { globalErrorHandler, notFoundHandler } from './middleware/errorHandler';
 dotenv.config();
 
 // ─── Process Level Unhandled Rejection & Uncaught Exception Handlers ──────
+// Issue 4 Fix: Log error and exit process cleanly so process manager/Vercel can restart a clean process instance
 process.on('uncaughtException', (error: Error) => {
   console.error(JSON.stringify({
     level: 'FATAL',
@@ -24,6 +25,7 @@ process.on('uncaughtException', (error: Error) => {
     stack: error.stack,
     timestamp: new Date().toISOString()
   }));
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason: any) => {
@@ -34,6 +36,7 @@ process.on('unhandledRejection', (reason: any) => {
     stack: reason?.stack,
     timestamp: new Date().toISOString()
   }));
+  process.exit(1);
 });
 
 const app = express();
@@ -45,7 +48,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"], // Required for Vite in dev
+      scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
@@ -66,18 +69,34 @@ if (!isProduction) {
   app.use(morgan('dev'));
 }
 
-// ─── CORS ─────────────────────────────────────────────────────────────────
-const allowedOrigins = isProduction
-  ? ['https://clarafashionspot.vercel.app']
-  : ['http://localhost:5173', 'http://localhost:3000'];
+// ─── CORS (Strict Whitelist - CWE-346 Fix) ─────────────────────────────────
+const trustedOrigins = new Set([
+  'https://abespokefashionspot.vercel.app',
+  'https://clarafashionspot.vercel.app',
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL.trim()] : []),
+  ...(!isProduction ? ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'] : [])
+]);
+
+// Helper to validate trusted Vercel preview deployments for this project only
+function isAuthorizedOrigin(origin: string): boolean {
+  if (trustedOrigins.has(origin)) return true;
+  // Match only official Vercel preview deployments belonging to tprraj2k8-8535s-projects
+  if (origin.startsWith('https://clarafashionspot-') && origin.endsWith('-tprraj2k8-8535s-projects.vercel.app')) {
+    return true;
+  }
+  return false;
+}
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow server-to-server or non-browser tools (no origin header)
+    if (!origin) {
+      return callback(null, true);
     }
+    if (isAuthorizedOrigin(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS: Origin is not trusted.'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -91,23 +110,52 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 // ─── Global Rate Limiter ───────────────────────────────────────────────────
 app.use('/api', globalLimiter);
 
-// ─── Static Uploads (local dev only — Vercel uses Cloudinary) ─────────────
+// ─── Static Uploads (local dev only) ──────────────────────────────────────
 if (!process.env.VERCEL) {
   const uploadsDir = path.join(__dirname, '../uploads');
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
   app.use('/uploads', express.static(uploadsDir));
 }
 
-// ─── Database Connection & Migrations ─────────────────────────────────────
-connectWithRetry()
-  .then(() => runMigrations())
-  .then(() => {
-    console.log('Database initialized and migrations completed.');
-  })
-  .catch((error) => {
-    console.error('Critical database initialization failure:', error);
-    process.exit(1);
-  });
+// ─── DB Connection & Migration Initialization Promise ─
+let dbInitPromise: Promise<void> | null = null;
+
+function ensureDbConnected(): Promise<void> {
+  if (!dbInitPromise) {
+    dbInitPromise = connectWithRetry()
+      .then(() => runMigrations())
+      .then(async () => {
+        console.log('Database initialized and migrations completed.');
+        // Production safety: Auto-seeding requires explicit ALLOW_AUTO_SEED=true env flag
+        if (process.env.ALLOW_AUTO_SEED === 'true') {
+          const { User: UserModel } = await import('./db/models.js');
+          const { seedDatabase } = await import('./db/seed.js');
+          const count = await UserModel.count();
+          if (count === 0) {
+            console.log('ALLOW_AUTO_SEED=true detected on empty DB. Seeding initial accounts...');
+            await seedDatabase();
+          }
+        }
+      })
+      .catch((error) => {
+        console.error('Critical database initialization failure:', error);
+        dbInitPromise = null;
+        throw error;
+      });
+  }
+  return dbInitPromise;
+}
+
+// Middleware ensuring DB connection and migrations complete before handling incoming requests
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  if (req.path === '/health' || req.path === '/api/health') return next();
+  try {
+    await ensureDbConnected();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ─── Enhanced Diagnostics & Health Endpoint ───────────────────────────────
 app.get(['/health', '/api/health'], async (req: Request, res: Response) => {

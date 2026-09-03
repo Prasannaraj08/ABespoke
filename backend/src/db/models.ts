@@ -26,8 +26,16 @@ User.init({
   tableName: 'users', 
   timestamps: true, 
   updatedAt: false,
+  hooks: {
+    beforeSave: (user: User) => {
+      if (user.email) {
+        user.email = user.email.trim().toLowerCase();
+      }
+    }
+  },
   indexes: [{ unique: true, fields: ['email'] }]
 });
+
 
 // ================= PRODUCT MODEL =================
 export class Product extends Model {

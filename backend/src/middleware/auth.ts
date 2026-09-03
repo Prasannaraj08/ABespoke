@@ -1,13 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { formatErrorResponse } from '../utils/errors';
+import { formatErrorResponse, AppError } from '../utils/errors';
 
-// Fail fast if JWT_SECRET is not set — never fall back to a hardcoded string in production
-const JWT_SECRET = process.env.JWT_SECRET?.trim();
-if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error('FATAL: JWT_SECRET environment variable is not set.');
+/**
+ * Dynamically resolves JWT secret from environment variables.
+ * In production, JWT_SECRET MUST be set in environment variables.
+ * Never uses a hardcoded fallback secret in production.
+ */
+export function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET?.trim();
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+
+  if (!secret) {
+    if (isProduction) {
+      console.error(JSON.stringify({
+        level: 'FATAL',
+        event: 'AUTH_CONFIG_ERROR',
+        message: 'JWT_SECRET environment variable is missing in production environment.',
+        timestamp: new Date().toISOString()
+      }));
+      throw new AppError('Authentication service is misconfigured. Please contact system administrator.', 500, 5000, true);
+    }
+    // Development mode only: permissive fallback for local developer testing
+    return 'dev_only_secret_change_in_production';
+  }
+  return secret;
 }
-const SECRET = JWT_SECRET || 'dev_only_secret_change_in_production';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -43,16 +61,21 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
     return formatErrorResponse(res, 401, 4011, 'Authentication token required', requestId);
   }
 
-  jwt.verify(token, SECRET, (err, decoded) => {
-    if (err) {
-      if (err.name === 'TokenExpiredError') {
-        return formatErrorResponse(res, 401, 4012, 'Session expired. Please log in again.', requestId);
+  try {
+    const secret = getJwtSecret();
+    jwt.verify(token, secret, (err, decoded) => {
+      if (err) {
+        if (err.name === 'TokenExpiredError') {
+          return formatErrorResponse(res, 401, 4012, 'Session expired. Please log in again.', requestId);
+        }
+        return formatErrorResponse(res, 401, 4013, 'Invalid or corrupted token', requestId);
       }
-      return formatErrorResponse(res, 401, 4013, 'Invalid or corrupted token', requestId);
-    }
-    req.user = decoded as { id: string; email: string; role: 'user' | 'boutique' | 'designer' | 'admin' };
-    next();
-  });
+      req.user = decoded as { id: string; email: string; role: 'user' | 'boutique' | 'designer' | 'admin' };
+      next();
+    });
+  } catch (err: any) {
+    next(err);
+  }
 }
 
 export function optionalAuthenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -66,12 +89,17 @@ export function optionalAuthenticateToken(req: AuthenticatedRequest, res: Respon
 
   if (!token) return next();
 
-  jwt.verify(token, SECRET, (err, decoded) => {
-    if (!err) {
-      req.user = decoded as { id: string; email: string; role: 'user' | 'boutique' | 'designer' | 'admin' };
-    }
+  try {
+    const secret = getJwtSecret();
+    jwt.verify(token, secret, (err, decoded) => {
+      if (!err) {
+        req.user = decoded as { id: string; email: string; role: 'user' | 'boutique' | 'designer' | 'admin' };
+      }
+      next();
+    });
+  } catch {
     next();
-  });
+  }
 }
 
 export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -97,5 +125,3 @@ export function requireDesigner(req: AuthenticatedRequest, res: Response, next: 
   }
   next();
 }
-
-export const JWT_SECRET_KEY = SECRET;

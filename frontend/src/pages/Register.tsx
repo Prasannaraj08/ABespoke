@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, User as UserIcon, AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 export const Register: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { register, googleLoginSim } = useAuth();
+  const { register } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -44,18 +45,6 @@ export const Register: React.FC = () => {
       setError(err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleRegisterSim = async () => {
-    setError('');
-    try {
-      await googleLoginSim('Jane Google Doe', 'jane.doe.google@gmail.com');
-      if (redirect === 'checkout') navigate('/checkout');
-      else if (redirect === 'dashboard') navigate('/dashboard');
-      else navigate('/');
-    } catch (err: any) {
-      setError(err);
     }
   };
 
@@ -168,12 +157,7 @@ export const Register: React.FC = () => {
               <span className="flex-shrink mx-4 text-luxury-muted uppercase font-bold text-[9px] tracking-wider font-sans">or sign up with</span>
               <div className="flex-grow border-t border-neutral-100" />
             </div>
-            <button
-              onClick={handleGoogleRegisterSim}
-              className="w-full bg-white hover:bg-neutral-50 border border-neutral-200 text-luxury-dark font-semibold text-[10px] uppercase tracking-widest py-3 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-luxury-gold" /> Continue with Google
-            </button>
+            <GoogleSignInButton className="w-full flex flex-col items-center" />
           </>
         )}
 

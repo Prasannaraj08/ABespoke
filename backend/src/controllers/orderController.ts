@@ -12,6 +12,16 @@ import {
 } from '../db/models';
 import { AuthenticatedRequest } from '../middleware/auth';
 
+function escapeHtml(str: any): string {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // --- ADDRESS CRUDS ---
 
 export async function getAddresses(req: AuthenticatedRequest, res: Response) {
@@ -247,66 +257,106 @@ export async function createOrder(req: AuthenticatedRequest, res: Response) {
       summary
     } = req.body;
 
-    if (!addressId || !paymentMethod || !items || !items.length || !summary) {
-      return res.status(400).json({ message: 'Missing order parameters' });
+    if (!addressId || !paymentMethod || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Missing or invalid order parameters: addressId, paymentMethod, and non-empty items are required.' });
+    }
+
+    // Verify address exists and belongs to user
+    const address = await AddressModel.findOne({ where: { id: addressId, userId } });
+    if (!address) {
+      return res.status(400).json({ message: 'Delivery address not found or does not belong to you.' });
     }
 
     const orderId = `ORD_${Date.now()}`;
-    const newOrder = {
-      id: orderId,
-      userId,
-      addressId,
-      paymentMethod,
-      paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Success',
-      orderStatus: 'Placed' as const,
-      items,
-      summary,
-      createdAt: new Date().toISOString()
-    };
+    let authoritativeOrder: any = null;
 
     // Execute checkout inside database transaction for consistent state
     await sequelize.transaction(async (t) => {
-      // 1. Verify and deduct stock
+      let authoritativeSubtotal = 0;
+      const verifiedItems: any[] = [];
+
+      // 1. Verify products, lock rows, calculate server-authoritative prices, and deduct stock
       for (const item of items) {
-        const product = await ProductModel.findByPk(item.productId, { transaction: t });
+        const qty = parseInt(String(item.quantity), 10);
+        if (isNaN(qty) || qty < 1) {
+          throw new Error(`Invalid quantity ${item.quantity} for product ${item.title || item.productId}. Quantity must be at least 1.`);
+        }
+
+        const product = await ProductModel.findByPk(item.productId, {
+          transaction: t,
+          lock: t.LOCK.UPDATE
+        });
+
         if (!product) {
-          throw new Error(`Product ${item.title} not found`);
+          throw new Error(`Product ${item.title || item.productId} not found in inventory.`);
         }
-        if (product.stock < item.quantity) {
-          throw new Error(`Insufficient stock for product ${item.title}`);
+        
+        const isPaused = Boolean(product.get('paused') ?? product.getDataValue('paused'));
+        if (isPaused) {
+          throw new Error(`Product "${product.get('title') || item.productId}" is currently unavailable for purchase.`);
         }
+
+        const currentStock = Number(product.get('stock') ?? product.getDataValue('stock') ?? 0);
+        if (currentStock < qty) {
+          throw new Error(`Insufficient stock for product "${product.get('title') || item.productId}". Only ${currentStock} available.`);
+        }
+
+        // Authoritative server-side price calculation (never trust client-provided item.price)
+        const basePrice = Number(product.get('price') ?? product.getDataValue('price') ?? 0);
+        const discountPercent = Number(product.get('discount') ?? product.getDataValue('discount') ?? 0);
+        const effectiveUnitPrice = Math.max(0, Math.round(basePrice * (1 - discountPercent / 100)));
+        const itemTotal = effectiveUnitPrice * qty;
+        authoritativeSubtotal += itemTotal;
+
+        const productTitle = String(product.get('title') ?? product.getDataValue('title') ?? 'Fashion Item');
+        const productBrand = String(product.get('brand') ?? product.getDataValue('brand') ?? '');
+        const productImages = product.get('images') ?? product.getDataValue('images');
+
+        verifiedItems.push({
+          productId: product.id,
+          title: productTitle,
+          brand: productBrand,
+          price: basePrice,
+          effectivePrice: effectiveUnitPrice,
+          discount: discountPercent,
+          quantity: qty,
+          size: String(item.size || 'Standard'),
+          color: String(item.color || 'Standard'),
+          image: Array.isArray(productImages) && productImages.length > 0 ? productImages[0] : (item.image || '')
+        });
 
         // Decrement stock in-db
-        await product.decrement('stock', { by: item.quantity, transaction: t });
-        const updatedStock = product.stock - item.quantity;
+        await product.decrement('stock', { by: qty, transaction: t });
+        const updatedStock = currentStock - qty;
 
-        // 2. Real-time Stock notifications (asynchronous but inside transactional context for consistency)
+        // 2. Real-time Stock notifications (safe check for brand)
         try {
-          const brandName = product.brand;
-          const boutiqueUser = await UserModel.findOne({
-            where: { name: brandName, role: 'boutique' },
-            transaction: t
-          });
-          
-          if (boutiqueUser) {
-            if (updatedStock === 0) {
-              await NotificationModel.create({
-                id: `notif_st_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-                userId: boutiqueUser.id,
-                type: 'inventory',
-                title: 'Out of Stock Alert',
-                message: `Your style "${product.title}" is now out of stock!`,
-                read: false
-              }, { transaction: t });
-            } else if (updatedStock <= 3) {
-              await NotificationModel.create({
-                id: `notif_st_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-                userId: boutiqueUser.id,
-                type: 'inventory',
-                title: 'Low Stock Alert',
-                message: `Your style "${product.title}" has only ${updatedStock} units remaining.`,
-                read: false
-              }, { transaction: t });
+          if (productBrand) {
+            const boutiqueUser = await UserModel.findOne({
+              where: { name: productBrand, role: 'boutique' },
+              transaction: t
+            });
+            
+            if (boutiqueUser && boutiqueUser.id) {
+              if (updatedStock === 0) {
+                await NotificationModel.create({
+                  id: `notif_st_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                  userId: boutiqueUser.id,
+                  type: 'inventory',
+                  title: 'Out of Stock Alert',
+                  message: `Your style "${productTitle}" is now out of stock!`,
+                  read: false
+                }, { transaction: t });
+              } else if (updatedStock <= 3) {
+                await NotificationModel.create({
+                  id: `notif_st_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                  userId: boutiqueUser.id,
+                  type: 'inventory',
+                  title: 'Low Stock Alert',
+                  message: `Your style "${productTitle}" has only ${updatedStock} units remaining.`,
+                  read: false
+                }, { transaction: t });
+              }
             }
           }
         } catch (stErr) {
@@ -314,10 +364,62 @@ export async function createOrder(req: AuthenticatedRequest, res: Response) {
         }
       }
 
-      // 3. Create Order
-      await OrderModel.create(newOrder, { transaction: t });
+      // 3. Authoritative Coupon Verification & Discount Calculation
+      let couponDiscount = 0;
+      let appliedCouponCode: string | null = null;
+      if (couponCode && String(couponCode).trim()) {
+        const cleanCode = String(couponCode).trim().toUpperCase();
+        const coupon = await CouponModel.findOne({
+          where: { code: cleanCode },
+          transaction: t
+        });
 
-      // 4. Dispatch Boutique New Order Notifications
+        if (coupon) {
+          const now = new Date();
+          const expiryDate = new Date(coupon.expiryDate);
+          const isNotExpired = isNaN(expiryDate.getTime()) || expiryDate >= now;
+          const meetsMinOrder = authoritativeSubtotal >= (coupon.minOrderAmount || 0);
+
+          if (isNotExpired && meetsMinOrder) {
+            couponDiscount = Math.round(authoritativeSubtotal * (Number(coupon.discountPercent) / 100));
+            if (coupon.maxDiscount && couponDiscount > Number(coupon.maxDiscount)) {
+              couponDiscount = Number(coupon.maxDiscount);
+            }
+            appliedCouponCode = coupon.code;
+          }
+        }
+      }
+
+      // 4. Authoritative Shipping and Final Payable Total
+      const shippingFee = authoritativeSubtotal >= 999 ? 0 : 99;
+      const authoritativeTotal = Math.max(0, authoritativeSubtotal - couponDiscount + shippingFee);
+
+      const authoritativeSummary = {
+        subtotal: authoritativeSubtotal,
+        discount: couponDiscount,
+        shippingFee,
+        total: authoritativeTotal,
+        couponApplied: appliedCouponCode,
+        computedAt: new Date().toISOString()
+      };
+
+      const newOrderData = {
+        id: orderId,
+        userId,
+        addressId,
+        paymentMethod,
+        paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Success',
+        orderStatus: 'Placed' as const,
+        items: verifiedItems,
+        summary: authoritativeSummary,
+        createdAt: new Date().toISOString()
+      };
+
+      // 5. Create Order with authoritative amounts
+      const createdOrder = await OrderModel.create(newOrderData, { transaction: t });
+      authoritativeOrder = createdOrder.get({ plain: true });
+
+      // 6. Dispatch Boutique New Order Notifications
       try {
         const boutiqueUsers = await UserModel.findAll({
           where: { role: 'boutique' },
@@ -325,12 +427,15 @@ export async function createOrder(req: AuthenticatedRequest, res: Response) {
         });
 
         for (const boutique of boutiqueUsers) {
+          const bId = boutique.getDataValue('id') ?? boutique.get('id');
+          if (!bId) continue;
+
           await NotificationModel.create({
             id: `notif_ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-            userId: boutique.id,
+            userId: bId,
             type: 'order',
             title: 'New Order Received',
-            message: `Order #${orderId} for a total of Rs. ${summary.total} was placed by a customer.`,
+            message: `Order #${orderId} for a total of Rs. ${authoritativeTotal} was placed by a customer.`,
             read: false
           }, { transaction: t });
         }
@@ -347,7 +452,7 @@ export async function createOrder(req: AuthenticatedRequest, res: Response) {
 
     res.status(201).json({
       message: 'Order placed successfully',
-      order: newOrder
+      order: authoritativeOrder
     });
   } catch (error: any) {
     console.error('Create order error:', error);
@@ -409,12 +514,12 @@ export async function downloadInvoice(req: AuthenticatedRequest, res: Response) 
 
     const address = await AddressModel.findByPk(order.addressId);
     
-    // Generate clean HTML printable invoice
+    // Issue 6 Fix: Generate HTML printable invoice with escaped user input fields
     const htmlInvoice = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Invoice - ${order.id}</title>
+        <title>Invoice - ${escapeHtml(order.id)}</title>
         <style>
           body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; margin: 40px; }
           .header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; }
@@ -436,21 +541,21 @@ export async function downloadInvoice(req: AuthenticatedRequest, res: Response) 
         <div class="header">
           <div>
             <div class="logo">ABespoke</div>
-            <div>Order ID: ${order.id}</div>
+            <div>Order ID: ${escapeHtml(order.id)}</div>
           </div>
           <div style="text-align: right;">
             <strong>INVOICE</strong><br>
-            Date: ${new Date(order.createdAt).toLocaleDateString()}<br>
-            Payment: ${order.paymentMethod} (${order.paymentStatus})
+            Date: ${escapeHtml(new Date(order.createdAt).toLocaleDateString())}<br>
+            Payment: ${escapeHtml(order.paymentMethod)} (${escapeHtml(order.paymentStatus)})
           </div>
         </div>
         <div class="info">
           <div class="info-block">
             <h3>Billed To:</h3>
-            <strong>${address?.name || 'Customer'}</strong><br>
-            ${address?.street || ''},<br>
-            ${address?.city || ''}, ${address?.state || ''} - ${address?.pincode || ''}<br>
-            Phone: ${address?.phone || ''}
+            <strong>${escapeHtml(address?.name || 'Customer')}</strong><br>
+            ${escapeHtml(address?.street || '')},<br>
+            ${escapeHtml(address?.city || '')}, ${escapeHtml(address?.state || '')} - ${escapeHtml(address?.pincode || '')}<br>
+            Phone: ${escapeHtml(address?.phone || '')}
           </div>
           <div class="info-block" style="text-align: right;">
             <h3>Shipped From:</h3>
@@ -474,12 +579,12 @@ export async function downloadInvoice(req: AuthenticatedRequest, res: Response) 
           <tbody>
             ${order.items.map((item: any) => `
               <tr>
-                <td><strong>${item.brand}</strong> - ${item.title}</td>
-                <td>${item.size}</td>
-                <td>${item.color}</td>
-                <td style="text-align: right;">Rs. ${item.price}</td>
-                <td style="text-align: right;">${item.quantity}</td>
-                <td style="text-align: right;">Rs. ${item.price * item.quantity}</td>
+                <td><strong>${escapeHtml(item.brand)}</strong> - ${escapeHtml(item.title)}</td>
+                <td>${escapeHtml(item.size)}</td>
+                <td>${escapeHtml(item.color)}</td>
+                <td style="text-align: right;">Rs. ${Number(item.price)}</td>
+                <td style="text-align: right;">${Number(item.quantity)}</td>
+                <td style="text-align: right;">Rs. ${Number(item.price) * Number(item.quantity)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -488,23 +593,23 @@ export async function downloadInvoice(req: AuthenticatedRequest, res: Response) 
           <table class="summary-table">
             <tr>
               <td>Subtotal:</td>
-              <td style="text-align: right;">Rs. ${order.summary.subtotal}</td>
+              <td style="text-align: right;">Rs. ${Number(order.summary.subtotal)}</td>
             </tr>
             <tr>
               <td>Discount:</td>
-              <td style="text-align: right; color: green;">- Rs. ${order.summary.discount}</td>
+              <td style="text-align: right; color: green;">- Rs. ${Number(order.summary.discount)}</td>
             </tr>
             <tr>
               <td>Tax:</td>
-              <td style="text-align: right;">Rs. ${order.summary.tax}</td>
+              <td style="text-align: right;">Rs. ${Number(order.summary.tax)}</td>
             </tr>
             <tr>
               <td>Shipping:</td>
-              <td style="text-align: right;">${order.summary.shipping === 0 ? 'FREE' : `Rs. ${order.summary.shipping}`}</td>
+              <td style="text-align: right;">${order.summary.shipping === 0 ? 'FREE' : `Rs. ${Number(order.summary.shipping)}`}</td>
             </tr>
             <tr class="total">
               <td>Total Amount:</td>
-              <td style="text-align: right;">Rs. ${order.summary.total}</td>
+              <td style="text-align: right;">Rs. ${Number(order.summary.total)}</td>
             </tr>
           </table>
         </div>

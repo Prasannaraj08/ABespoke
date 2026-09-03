@@ -95,7 +95,7 @@ api.interceptors.response.use(
 
 /**
  * Maps Axios errors & HTTP status codes to user-friendly messages.
- * Prevents displaying raw 500 errors or technical stack traces to users.
+ * Prevents displaying raw 500 errors, HTML dumps, or technical stack traces to users.
  */
 export function getFriendlyErrorMessage(error: any, fallback = 'Something went wrong on our side.'): string {
   if (!error || !error.response) {
@@ -104,25 +104,29 @@ export function getFriendlyErrorMessage(error: any, fallback = 'Something went w
   const status = error.response.status;
   const data = error.response.data;
 
-  if (data?.error?.message) {
-    return data.error.message;
-  }
-  if (data?.message) {
-    return data.message;
+  // 1. Prioritize structured backend error message if string and not raw HTML
+  if (typeof data === 'object' && data !== null) {
+    if (typeof data.error?.message === 'string' && data.error.message.trim() && !data.error.message.includes('<!DOCTYPE')) {
+      return data.error.message;
+    }
+    if (typeof data.message === 'string' && data.message.trim() && !data.message.includes('<!DOCTYPE')) {
+      return data.message;
+    }
   }
 
+  // 2. HTTP-status-specific safe fallbacks
   switch (status) {
     case 400: return 'Invalid request parameters. Please verify input data.';
-    case 401: return 'Session expired. Please log in again.';
+    case 401: return 'Invalid credentials or session expired. Please try again.';
     case 403: return 'You don\'t have permission to perform this action.';
     case 404: return 'Requested resource not found.';
     case 409: return 'A resource with this information already exists.';
-    case 429: return 'Too many requests. Please slow down and try again.';
+    case 429: return 'Too many attempts. Please slow down and try again.';
     case 500:
     case 502:
     case 503:
     case 504:
-      return 'Something went wrong on our side.';
+      return 'Service temporarily unavailable. Our engineering team has been notified.';
     default: return fallback;
   }
 }

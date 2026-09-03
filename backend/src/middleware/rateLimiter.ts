@@ -10,10 +10,10 @@ export const globalLimiter = rateLimit({
   skip: (req) => req.path === '/health' || req.path === '/api/health',
 });
 
-/** Strict limit for auth endpoints: 10 requests per 15 minutes per IP */
+/** Limit for auth endpoints: 60 requests per 15 minutes per IP */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many authentication attempts. Please try again after 15 minutes.', errorCode: 4290 },
@@ -26,4 +26,13 @@ export const uploadLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Upload limit reached. Please try again later.', errorCode: 4290 },
+});
+
+/** Checkout limit: 20 checkout attempts per 15 minutes per IP (Anti-inventory hoarding & anti-card stuffing) */
+export const checkoutLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many order attempts. Please wait a few minutes before checking out again.', errorCode: 4290 },
 });

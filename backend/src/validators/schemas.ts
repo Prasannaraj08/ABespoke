@@ -58,7 +58,18 @@ export const addressSchema = z.object({
 export const orderSchema = z.object({
   addressId: z.string().min(1, { message: 'Address ID is required' }),
   paymentMethod: z.enum(['UPI', 'Card', 'Net Banking', 'COD']),
-  paymentStatus: z.enum(['Pending', 'Completed']).default('Pending')
+  paymentStatus: z.enum(['Pending', 'Completed', 'Success']).default('Pending'),
+  items: z.array(z.object({
+    productId: z.string().min(1, { message: 'Product ID is required' }),
+    quantity: z.number().int().positive({ message: 'Quantity must be a positive integer' }).default(1),
+    size: z.string().optional(),
+    color: z.string().optional(),
+    price: z.number().optional(),
+    title: z.string().optional(),
+    image: z.string().optional()
+  })).min(1, { message: 'Order must contain at least one item' }),
+  couponCode: z.string().optional(),
+  summary: z.any().optional()
 });
 
 // ================= BOUTIQUE SELLER VALIDATIONS =================

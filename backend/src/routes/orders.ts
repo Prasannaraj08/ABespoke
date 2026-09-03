@@ -3,6 +3,7 @@ import { getOrders, getOrderById, createOrder, downloadInvoice } from '../contro
 import { authenticateToken } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { orderSchema } from '../validators/schemas';
+import { checkoutLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
@@ -11,7 +12,7 @@ router.use(authenticateToken);
 
 router.get('/', getOrders);
 router.get('/:id', getOrderById);
-router.post('/', validateBody(orderSchema), createOrder);
+router.post('/', checkoutLimiter, validateBody(orderSchema), createOrder);
 router.get('/:id/invoice', downloadInvoice);
 
 export default router;

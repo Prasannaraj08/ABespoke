@@ -61,12 +61,20 @@ export async function updateCart(req: AuthenticatedRequest, res: Response) {
       return res.status(400).json({ message: 'Invalid cart payload' });
     }
 
-    const validatedItems = items.map(item => ({
-      productId: String(item.productId),
-      size: String(item.size),
-      color: String(item.color),
-      quantity: Math.max(1, Number(item.quantity))
-    }));
+    // Issue 5 Fix: Strict validation of item quantity to prevent NaN values in database
+    const validatedItems: any[] = [];
+    for (const item of items) {
+      const q = Number(item.quantity);
+      if (!item.productId || !Number.isFinite(q) || q < 1) {
+        return res.status(400).json({ message: 'Invalid item quantity or product ID in cart payload' });
+      }
+      validatedItems.push({
+        productId: String(item.productId),
+        size: String(item.size || ''),
+        color: String(item.color || ''),
+        quantity: Math.floor(q)
+      });
+    }
 
     await CartModel.upsert({
       userId,

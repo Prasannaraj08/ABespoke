@@ -135,13 +135,13 @@ export const DesignerDashboard: React.FC = () => {
 
       {/* Verification Warning Banner */}
       {!profile.verified && (
-        <div className="bg-amber-50 border border-amber-200/50 rounded-xl p-5 flex items-start gap-4 text-amber-800 shadow-sm leading-relaxed">
+        <div className="bg-amber-50 border border-amber-200/80 rounded-xl p-5 flex items-start gap-4 text-amber-900 shadow-sm leading-relaxed">
           <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-xs space-y-1 font-sans">
-            <h4 className="font-bold uppercase tracking-wider text-[9px]">Verification Pending</h4>
-            <p className="font-light">
-              Your Designer profile is currently under review by our fashion administration team. 
-              Add portfolio images and collections to automatically trigger verified status.
+            <h4 className="font-bold uppercase tracking-wider text-[10px] text-amber-800">Account Pending Admin Approval</h4>
+            <p className="font-light text-amber-900/90 leading-relaxed">
+              Your Fashion Designer account is awaiting administrator review. 
+              <strong> You can post clothes and publish exclusive collections only after your account is approved by the administrator.</strong>
             </p>
           </div>
         </div>
@@ -296,11 +296,17 @@ export const DesignerDashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleAddCollection}
-                  className="bg-luxury-gold hover:bg-[#a3803b] text-white px-4 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-colors"
+                  disabled={!profile.verified}
+                  className="bg-luxury-gold hover:bg-[#a3803b] text-white px-4 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   Add
                 </button>
               </div>
+              {!profile.verified && (
+                <p className="text-[11px] text-amber-700 font-medium pt-1">
+                  ⚠️ Adding exclusive collections is locked until your designer account is approved by admin.
+                </p>
+              )}
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {profile.exclusiveCollections.map((col: string, idx: number) => (
                   <span key={idx} className="bg-[#FAF9F6] text-luxury-dark border border-neutral-200 px-3 py-1 rounded text-[9px] uppercase tracking-wider font-semibold">
@@ -318,12 +324,17 @@ export const DesignerDashboard: React.FC = () => {
                 value={profile.portfolioImages}
                 onChange={(urls) => setProfile({ ...profile, portfolioImages: urls })}
               />
+              {!profile.verified && (
+                <p className="text-[11px] text-amber-700 font-medium pt-1">
+                  ⚠️ Posting clothes & lookbook images is locked until administrator approval.
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
               disabled={saving}
-              className="bg-luxury-dark hover:bg-neutral-800 text-white font-semibold text-[10px] uppercase tracking-wider px-6 py-2.5 rounded-lg shadow-sm transition-colors disabled:bg-zinc-300"
+              className="bg-luxury-dark hover:bg-neutral-800 text-white font-semibold text-[10px] uppercase tracking-wider px-6 py-2.5 rounded-lg shadow-sm transition-colors disabled:bg-zinc-300 cursor-pointer"
             >
               {saving ? 'Saving Portfolio...' : 'Save Designer Portfolio'}
             </button>

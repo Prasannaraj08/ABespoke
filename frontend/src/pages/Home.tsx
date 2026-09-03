@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ShieldCheck, Truck, RefreshCw, ChevronDown, CheckCircle, Star, Quote, Mail } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Truck, RefreshCw, ChevronDown, CheckCircle, Quote, Mail, Store } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import { productsAPI, publicBoutiqueAPI, designerAPI } from '../services/api';
 
 export const Home: React.FC = () => {
@@ -165,6 +166,20 @@ export const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* Google Sign-In Quick Access Banner */}
+      <div className="max-w-4xl mx-auto px-6 -mt-10 relative z-20">
+        <div className="bg-white border border-[#ECE8E2] rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 backdrop-blur-md">
+          <div className="space-y-1.5 text-center sm:text-left">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#B8893D]">Instant Privilege Access</span>
+            <h3 className="font-serif text-xl font-bold text-[#1F2937]">Sign In With Google</h3>
+            <p className="text-xs text-[#6B7280] font-light max-w-sm">Connect your Google account instantly. Profile records & fitting preferences are stored in PostgreSQL.</p>
+          </div>
+          <div className="shrink-0 flex flex-col items-center">
+            <GoogleSignInButton className="w-full" />
+          </div>
+        </div>
+      </div>
+
       {/* 2. Curated Department Showcase */}
       <div className="max-w-7xl mx-auto px-6 space-y-12">
         <div className="text-center space-y-2 max-w-xl mx-auto">
@@ -304,6 +319,56 @@ export const Home: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* 5. New Arrivals & Fresh Drops */}
+      {newArrivals.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 space-y-8">
+          <div className="flex justify-between items-end border-b border-[#ECE8E2] pb-4">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#B8893D]">Fresh Drops</span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-[#1F2937]">New Arrivals</h2>
+            </div>
+            <Link to="/catalog?sort=new-arrivals" className="text-xs font-bold uppercase tracking-wider text-[#3A5040] hover:text-[#1F2937] transition-colors flex items-center gap-1.5">
+              <span>View All Drops</span> <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {newArrivals.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 6. Trending Boutiques */}
+      {boutiques.length > 0 && (
+        <div className="max-w-7xl mx-auto px-6 space-y-8">
+          <div className="flex justify-between items-end border-b border-[#ECE8E2] pb-4">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#B8893D]">Curated Partners</span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-[#1F2937]">Featured Boutique Stores</h2>
+            </div>
+            <Link to="/catalog?category=Boutiques" className="text-xs font-bold uppercase tracking-wider text-[#3A5040] hover:text-[#1F2937] transition-colors flex items-center gap-1">
+              <span>Explore All Stores</span> <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {boutiques.map((b: any, idx: number) => (
+              <div key={idx} className="bg-white border border-[#ECE8E2] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#F8F6F2] border border-[#ECE8E2] flex items-center justify-center text-[#3A5040] shrink-0 font-bold">
+                  <Store className="w-6 h-6" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <h3 className="font-serif text-base font-bold text-[#1F2937]">{b.boutiqueName || 'Boutique Store'}</h3>
+                  <p className="text-[11px] text-[#6B7280] font-light truncate">{b.specialization || 'Bridal & Fine Silk Wear'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 6. Testimonials Section */}
       <div className="max-w-7xl mx-auto px-6 space-y-8">

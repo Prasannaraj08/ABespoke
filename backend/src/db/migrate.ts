@@ -31,7 +31,7 @@ const migrations: Migration[] = [
 ];
 
 /**
- * Runs all pending migrations.
+ * Runs all pending migrations in a thread-safe / cold-start race-resilient manner.
  */
 export async function runMigrations(): Promise<void> {
   const queryInterface = sequelize.getQueryInterface();
@@ -50,24 +50,50 @@ export async function runMigrations(): Promise<void> {
   });
   const appliedNames = new Set<string>(appliedRows.map((row: any) => row.name));
 
-  console.log('Checking for pending database migrations...');
-
   for (const migration of migrations) {
     if (!appliedNames.has(migration.name)) {
       console.log(`Running pending migration: ${migration.name}`);
       const transaction = await sequelize.transaction();
       try {
         await migration.up(queryInterface);
-        await sequelize.query('INSERT INTO sequelize_meta (name) VALUES (?)', {
-          replacements: [migration.name],
-          transaction
-        });
+
+        // Cold-start race resilient insertion into meta table
+        const dialect = sequelize.getDialect();
+        if (dialect === 'postgres') {
+          await sequelize.query('INSERT INTO sequelize_meta (name) VALUES (?) ON CONFLICT (name) DO NOTHING', {
+            replacements: [migration.name],
+            transaction
+          });
+        } else {
+          try {
+            await sequelize.query('INSERT INTO sequelize_meta (name) VALUES (?)', {
+              replacements: [migration.name],
+              transaction
+            });
+          } catch (insertErr: any) {
+            // Ignore duplicate key error on race condition
+            if (!insertErr.message?.includes('UNIQUE') && !insertErr.message?.includes('duplicate')) {
+              throw insertErr;
+            }
+          }
+        }
+
         await transaction.commit();
         console.log(`Successfully completed migration: ${migration.name}`);
-      } catch (err) {
+      } catch (err: any) {
         await transaction.rollback();
-        console.error(`Migration ${migration.name} failed. Database changes rolled back.`, err);
-        throw err;
+        // If another concurrent cold start completed this migration while we rolled back, treat as non-fatal
+        const recheckRows: any[] = await sequelize.query('SELECT name FROM sequelize_meta WHERE name = ?', {
+          replacements: [migration.name],
+          type: 'SELECT' as any
+        }).catch(() => []);
+
+        if (recheckRows.length > 0) {
+          console.log(`Migration ${migration.name} was applied concurrently by another worker instance.`);
+        } else {
+          console.error(`Migration ${migration.name} failed. Database changes rolled back.`, err);
+          throw err;
+        }
       }
     }
   }

@@ -57,20 +57,21 @@ router.put('/profile', authenticateToken, requireDesigner, validateBody(designer
 
     const portfolioImgs = Array.isArray(sanitized.portfolioImages) ? sanitized.portfolioImages : (profile.portfolioImages || []);
     const collections = Array.isArray(sanitized.exclusiveCollections) ? sanitized.exclusiveCollections : (profile.exclusiveCollections || []);
-    const aboutText = sanitized.about !== undefined ? sanitized.about : (profile.about || '');
 
-    // Auto-verification criteria: Name + (portfolio images OR collections OR about text >= 10 chars)
-    const isEligibleForVerification = (
-      Boolean(sanitized.designerName || profile.designerName) &&
-      (portfolioImgs.length > 0 || collections.length > 0 || aboutText.length >= 10)
-    );
-
-    const updatedVerifiedStatus = profile.verified || isEligibleForVerification;
+    // Strict Rule: Designers can post clothes and collections ONLY after Admin approval!
+    const isAttemptingToPost = portfolioImgs.length > (profile.portfolioImages?.length || 0) || collections.length > (profile.exclusiveCollections?.length || 0);
+    if (!profile.verified && isAttemptingToPost) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your designer account is pending approval by the administrator. You will be able to post clothes and collections once verified.',
+        errorCode: 4030
+      });
+    }
 
     await profile.update({
       ...sanitized,
       userId: req.user.id, // Immutable
-      verified: updatedVerifiedStatus
+      verified: profile.verified // Admin approval required: cannot self-verify!
     });
 
     return res.status(200).json({

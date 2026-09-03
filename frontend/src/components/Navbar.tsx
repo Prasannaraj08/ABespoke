@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, User, LogOut, ChevronDown, Menu, X, Command } from 'lucide-react';
+import { Search, Heart, ShoppingBag, LogOut, ChevronDown, Menu, X, Command } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -80,17 +80,31 @@ export const Navbar: React.FC<NavbarProps> = ({ onCartClick }) => {
         {/* Right: Actions */}
         <div className="flex items-center gap-5">
           
-          {/* User Profile */}
-          <div ref={profileRef} className="relative">
-            <button
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="flex items-center gap-1 p-1 hover:text-[#3A5040] transition-colors cursor-pointer"
+          {/* User Profile or Sign In */}
+          {!user ? (
+            <Link
+              to="/login"
+              className="flex items-center gap-2 bg-[#1F2937] hover:bg-[#3A5040] text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold tracking-wider transition-all shadow-xs"
             >
-              <div className="w-8 h-8 rounded-full bg-[#F8F6F2] border border-[#ECE8E2] flex items-center justify-center text-[#1F2937] font-bold text-xs uppercase">
-                {user ? user.name.charAt(0) : <User className="w-4 h-4" />}
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#6B7280] hidden sm:block" />
-            </button>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
+                <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.4 0 15.3c0 2.9.7 5.6 1.9 8l3.7-2.9z"/>
+                <path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.9C3.7 20.6 7.5 23.5 12 23.5z"/>
+              </svg>
+              <span>Sign In</span>
+            </Link>
+          ) : (
+            <div ref={profileRef} className="relative">
+              <button
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="flex items-center gap-1 p-1 hover:text-[#3A5040] transition-colors cursor-pointer"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#F8F6F2] border border-[#ECE8E2] flex items-center justify-center text-[#1F2937] font-bold text-xs uppercase">
+                  {user.name.charAt(0)}
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-[#6B7280] hidden sm:block" />
+              </button>
 
             {showProfileDropdown && (
               <div className="absolute right-0 top-11 w-60 bg-white border border-[#ECE8E2] shadow-2xl rounded-2xl p-2 z-50 text-xs font-sans animate-fadeIn">
@@ -145,6 +159,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onCartClick }) => {
               </div>
             )}
           </div>
+        )}
 
           {/* Wishlist */}
           <Link to="/dashboard?tab=wishlist" className="relative p-1 hover:text-[#3A5040] transition-colors">
