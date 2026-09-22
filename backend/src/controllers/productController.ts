@@ -211,6 +211,18 @@ export async function addProductReview(req: AuthenticatedRequest, res: Response)
       return res.status(404).json({ success: false, message: 'Product not found', errorCode: 4040 });
     }
 
+    // SEC-09: Prevent duplicate review spamming
+    const existingReview = await ReviewModel.findOne({
+      where: { productId, userId },
+    });
+    if (existingReview) {
+      return res.status(409).json({
+        success: false,
+        message: 'You have already submitted a review for this product.',
+        errorCode: 4090,
+      });
+    }
+
     const newReview = await ReviewModel.create({
       id: `r_${Date.now()}`,
       productId,

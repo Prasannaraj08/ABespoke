@@ -6,7 +6,9 @@ import {
   Product as ProductModel, 
   BoutiqueProfile as BoutiqueProfileModel, 
   DesignerProfile as DesignerProfileModel, 
-  User as UserModel 
+  User as UserModel,
+  Tailor as TailorModel,
+  PortfolioItem as PortfolioItemModel
 } from '../db/models';
 
 const router = Router();
@@ -157,17 +159,46 @@ router.delete('/', authenticateToken, async (req: any, res) => {
       return res.status(200).json({ success: true, message: 'Designer portfolio asset deleted successfully' });
     }
 
-    // 5. Boutique: can only delete if asset belongs to their products or profile
+    // 5. Boutique: can only delete if asset belongs to their products, profile, tailors, or portfolio
     if (user.role === 'boutique') {
+      const boutiqueProfile = await BoutiqueProfileModel.findByPk(user.id);
       const boutiqueUser = await UserModel.findByPk(user.id);
-      const boutiqueName = boutiqueUser?.name;
+      const boutiqueName = boutiqueProfile?.boutiqueName || boutiqueUser?.name;
 
-      const ownsProductImage = boutiqueName ? await ProductModel.findOne({
-        where: { brand: boutiqueName }
-      }) : null;
+      const ownedAssets: string[] = [];
+      if (boutiqueProfile?.logoUrl) ownedAssets.push(boutiqueProfile.logoUrl);
+      if (boutiqueProfile?.bannerUrl) ownedAssets.push(boutiqueProfile.bannerUrl);
+
+      if (boutiqueName) {
+        const products = await ProductModel.findAll({
+          where: { brand: boutiqueName },
+          attributes: ['images']
+        });
+        for (const p of products) {
+          const imgs = Array.isArray(p.images) ? p.images : (typeof p.images === 'string' ? JSON.parse(p.images) : []);
+          ownedAssets.push(...imgs);
+        }
+      }
+
+      const tailors = await TailorModel.findAll({
+        where: { boutiqueId: user.id },
+        attributes: ['photoUrl']
+      });
+      for (const t of tailors) {
+        if (t.photoUrl) ownedAssets.push(t.photoUrl);
+      }
+
+      const portfolioItems = await PortfolioItemModel.findAll({
+        where: { boutiqueId: user.id },
+        attributes: ['images']
+      });
+      for (const pi of portfolioItems) {
+        const imgs = Array.isArray(pi.images) ? pi.images : (typeof pi.images === 'string' ? JSON.parse(pi.images) : []);
+        ownedAssets.push(...imgs);
+      }
 
       // Check if this boutique owns the asset
-      const owns = ownsProductImage !== null;
+      const owns = ownedAssets.some(img => img && (img.includes(pid) || (url && img === url)));
       if (!owns) {
         return res.status(403).json({
           success: false,

@@ -11,12 +11,12 @@ export function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET?.trim();
   const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
 
-  if (!secret) {
+  if (!secret || secret === 'dev_only_secret_change_in_production') {
     if (isProduction) {
       console.error(JSON.stringify({
         level: 'FATAL',
         event: 'AUTH_CONFIG_ERROR',
-        message: 'JWT_SECRET environment variable is missing in production environment.',
+        message: 'JWT_SECRET environment variable is missing or insecure in production environment.',
         timestamp: new Date().toISOString()
       }));
       throw new AppError('Authentication service is misconfigured. Please contact system administrator.', 500, 5000, true);

@@ -77,10 +77,29 @@ router.put('/profile', authenticateToken, requireBoutique, validateBody(boutique
         return obj;
       }, {});
 
+    // SEC-05: Prevent brand name collision / spoofing
+    if (sanitized.boutiqueName && sanitized.boutiqueName.trim().toLowerCase() !== profile.boutiqueName?.toLowerCase()) {
+      const existingBoutique = await BoutiqueProfileModel.findOne({
+        where: {
+          boutiqueName: isPostgres
+            ? { [Op.iLike]: sanitized.boutiqueName.trim() }
+            : { [Op.like]: sanitized.boutiqueName.trim() },
+          userId: { [Op.ne]: req.user.id }
+        }
+      });
+      if (existingBoutique) {
+        return res.status(409).json({
+          success: false,
+          message: 'A boutique with this brand name already exists. Please choose a unique name.',
+          errorCode: 4090
+        });
+      }
+    }
+
     await profile.update({
       ...sanitized,
       userId: req.user.id, // Immutable
-      verified: req.body.verified !== undefined ? Boolean(req.body.verified) : (profile.verified ?? true)
+      verified: profile.verified // Verification cannot be self-elevated
     });
 
     res.status(200).json(profile.get({ plain: true }));
@@ -167,7 +186,8 @@ router.put('/products/:id', authenticateToken, requireBoutique, validateBody(pro
       return res.status(403).json({ message: 'Forbidden. You do not own this product.' });
     }
 
-    await product.update(req.body);
+    const { brand, id, ...safeUpdates } = req.body;
+    await product.update(safeUpdates);
     res.status(200).json({
       message: 'Product updated successfully',
       product: product.get({ plain: true })
@@ -260,7 +280,61 @@ router.put('/orders/:id/status', authenticateToken, requireBoutique, async (req:
     const order = await OrderModel.findByPk(req.params.id);
     if (!order) return res.status(404).json({ message: 'Order not found' });
 
-    await order.update({ orderStatus: status });
+    // SEC-03: Verify boutique ownership of items in this order
+    const profile = await BoutiqueProfileModel.findByPk(req.user.id);
+    const boutiqueBrand = profile?.boutiqueName || req.user.name || '';
+    const boutiqueProducts = await ProductModel.findAll({
+      where: boutiqueBrand ? {
+        brand: isPostgres ? { [Op.iLike]: boutiqueBrand } : { [Op.like]: boutiqueBrand }
+      } : { id: 'none' },
+      attributes: ['id'],
+    });
+    const productIdSet = new Set(boutiqueProducts.map(p => p.id));
+
+    let items: any[] = [];
+    try {
+      items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+    } catch {
+      items = [];
+    }
+
+    const ownsItem = items.some((item: any) =>
+      (item.productId && productIdSet.has(item.productId)) ||
+      (boutiqueBrand && item.brand?.toLowerCase() === boutiqueBrand.toLowerCase())
+    );
+
+    if (!ownsItem && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden. You do not have permissions to modify this order.',
+        errorCode: 4030,
+      });
+    }
+
+    // State machine transition validation
+    const VALID_TRANSITIONS: Record<string, string[]> = {
+      'Placed': ['Shipped', 'Cancelled'],
+      'Processing': ['Shipped', 'Cancelled'],
+      'Shipped': ['Out for Delivery', 'Cancelled'],
+      'Out for Delivery': ['Delivered'],
+      'Delivered': [],
+      'Cancelled': [],
+    };
+    const allowedNext = VALID_TRANSITIONS[order.orderStatus] || [];
+    if (!allowedNext.includes(status) && req.user.role !== 'admin') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot transition order from '${order.orderStatus}' to '${status}'`,
+        errorCode: 4001,
+      });
+    }
+
+    const updates: any = { orderStatus: status };
+    if (status === 'Delivered') {
+      updates.paymentStatus = 'Success';
+    }
+
+    await order.update(updates);
     res.status(200).json(order.get({ plain: true }));
   } catch (err) {
     console.error('Update order error:', err);

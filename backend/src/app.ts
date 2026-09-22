@@ -40,6 +40,7 @@ process.on('unhandledRejection', (reason: any) => {
 });
 
 const app = express();
+app.set('trust proxy', 1);
 const isProduction = process.env.NODE_ENV === 'production';
 
 // ─── Security Headers ──────────────────────────────────────────────────────
