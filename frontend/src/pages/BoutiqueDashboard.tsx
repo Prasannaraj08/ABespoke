@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  BarChart3, Package, ShoppingBag, ShieldAlert, Plus, Edit2, Trash2, 
+  BarChart3, Package, ShoppingBag, Plus, Edit2, Trash2, 
   User, Copy, Calendar, Award, Briefcase, Search, Bell, CheckCheck 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -510,15 +510,15 @@ export const BoutiqueDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Verification Warning Banner */}
+      {/* Verification Notice Banner */}
       {!profile.verified && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-800 shadow-sm leading-relaxed">
+        <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-emerald-900 shadow-sm leading-relaxed">
           <div className="flex items-start gap-3">
-            <ShieldAlert className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+            <Award className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
             <div className="text-xs space-y-1 font-sans">
-              <h4 className="font-bold uppercase tracking-wider text-[10px]">Verification Under Review</h4>
-              <p className="font-light">
-                Your Boutique Seller Account is in setup mode. You can publish collections and fulfill orders immediately.
+              <h4 className="font-bold uppercase tracking-wider text-[10px] text-emerald-800">All Features Unrestricted</h4>
+              <p className="font-light text-emerald-700">
+                Your boutique has complete access to publish Work Portfolio lookbooks, showcase Master Tailors, manage Inventory, and accept Client Orders.
               </p>
             </div>
           </div>
@@ -527,12 +527,12 @@ export const BoutiqueDashboard: React.FC = () => {
               try {
                 const updated = await boutiqueAPI.updateProfile({ ...profile, verified: true });
                 setProfile(updated?.profile || updated || { ...profile, verified: true });
-                alert('Boutique verified badge enabled.');
+                alert('Verified Atelier badge enabled successfully!');
               } catch (e) {
                 alert('Failed to update verification status.');
               }
             }}
-            className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm"
+            className="shrink-0 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs px-4 py-2 rounded-xl shadow-sm transition-colors"
           >
             Activate Verified Badge
           </button>
