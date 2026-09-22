@@ -121,34 +121,26 @@ export const BoutiqueDashboard: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // Profile
       const toArr = (val: any) => Array.isArray(val) ? val : (Array.isArray(val?.data) ? val.data : (Array.isArray(val?.items) ? val.items : []));
 
-      const prof = await boutiqueAPI.getProfile();
-      setProfile(prof?.profile || prof?.data || prof || {});
+      const [prof, ts, ports, hr, notifs, ords, boutiqueProds] = await Promise.all([
+        boutiqueAPI.getProfile().catch((e: any) => { console.warn('Boutique profile load fallback:', e); return null; }),
+        boutiqueAPI.getTailors().catch((e: any) => { console.warn('Boutique tailors load fallback:', e); return []; }),
+        boutiqueAPI.getPortfolio().catch((e: any) => { console.warn('Boutique portfolio load fallback:', e); return []; }),
+        boutiqueAPI.getHiring().catch((e: any) => { console.warn('Boutique hiring load fallback:', e); return []; }),
+        boutiqueAPI.getNotifications().catch((e: any) => { console.warn('Boutique notifications load fallback:', e); return []; }),
+        boutiqueAPI.getOrders().catch((e: any) => { console.warn('Boutique orders load fallback:', e); return []; }),
+        boutiqueAPI.getProducts().catch((e: any) => { console.warn('Boutique products load fallback:', e); return []; }),
+      ]);
 
-      // Tailors
-      const ts = await boutiqueAPI.getTailors();
+      if (prof) {
+        setProfile((prev: any) => ({ ...prev, ...(prof?.profile || prof?.data || prof) }));
+      }
       setTailors(toArr(ts));
-
-      // Portfolios
-      const ports = await boutiqueAPI.getPortfolio();
       setPortfolio(toArr(ports));
-
-      // Hiring requirement posts
-      const hr = await boutiqueAPI.getHiring();
       setHiring(toArr(hr));
-
-      // Notifications
-      const notifs = await boutiqueAPI.getNotifications();
       setNotifications(toArr(notifs));
-
-      // Orders
-      const ords = await boutiqueAPI.getOrders();
       setOrders(toArr(ords));
-
-      // Boutique Products
-      const boutiqueProds = await boutiqueAPI.getProducts();
       setProducts(toArr(boutiqueProds));
     } catch (err) {
       console.error('Failed to load Boutique Seller Portal details:', err);
@@ -405,11 +397,11 @@ export const BoutiqueDashboard: React.FC = () => {
   const outOfStockProducts = safeProducts.filter(p => p && Number(p.stock) <= 0).length;
   const pendingOrders = safeOrders.filter(o => o && (o.orderStatus === 'Placed' || o.orderStatus === 'Packed' || o.orderStatus === 'Shipped')).length;
   const completedOrders = safeOrders.filter(o => o && o.orderStatus === 'Delivered').length;
-  const totalRevenue = safeOrders.reduce((acc, o) => acc + (o && o.orderStatus === 'Delivered' ? (Number(o.summary?.total) || 0) : 0), 0);
+  const totalRevenue = safeOrders.reduce((acc, o) => acc + (o && o.orderStatus === 'Delivered' ? (Number(o?.summary?.total ?? o?.total ?? 0)) : 0), 0);
   const unreadNotifCount = safeNotifications.filter(n => n && !n.read).length;
 
-  // Dynamic monthly revenue for the past 6 calendar months
-  const monthlyRevenueData = React.useMemo(() => {
+  // Dynamic monthly revenue for the past 6 calendar months (pure calculation, zero hook violations)
+  const getMonthlyRevenueData = () => {
     const months: { label: string; yearMonth: string; revenue: number }[] = [];
     const now = new Date();
     for (let i = 5; i >= 0; i--) {
@@ -425,7 +417,7 @@ export const BoutiqueDashboard: React.FC = () => {
         const ym = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
         const match = months.find(m => m.yearMonth === ym);
         if (match) {
-          match.revenue += Number(o.summary?.total) || 0;
+          match.revenue += Number(o?.summary?.total ?? o?.total ?? 0);
         }
       }
     });
@@ -433,7 +425,9 @@ export const BoutiqueDashboard: React.FC = () => {
     const maxRevenue = Math.max(...months.map(m => m.revenue), 1000);
     const hasAnySales = months.some(m => m.revenue > 0);
     return { months, maxRevenue, hasAnySales };
-  }, [safeOrders]);
+  };
+
+  const monthlyRevenueData = getMonthlyRevenueData();
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 font-sans space-y-8">
@@ -1407,22 +1401,22 @@ export const BoutiqueDashboard: React.FC = () => {
                     </div>
 
                     <div className="divide-y divide-[#EBE6DC]/40">
-                      {o.items.map((item: any, idx: number) => (
+                      {(Array.isArray(o?.items) ? o.items : []).map((item: any, idx: number) => (
                         <div key={idx} className="flex gap-4 py-3 first:pt-0 last:pb-0 items-center">
-                          <img src={item.image} alt={item.title} className="w-12 h-12 rounded-lg object-cover border" />
+                          <img src={item?.image || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'} alt={item?.title || 'Item'} className="w-12 h-12 rounded-lg object-cover border" />
                           <div className="flex-1">
-                            <h4 className="font-semibold text-luxury-dark text-xs">{item.title}</h4>
-                            <p className="text-[10px] text-luxury-muted uppercase">{item.brand} | Size: {item.size} | Color: {item.color}</p>
+                            <h4 className="font-semibold text-luxury-dark text-xs">{item?.title || 'Custom Fashion Item'}</h4>
+                            <p className="text-[10px] text-luxury-muted uppercase">{item?.brand || ''} | Size: {item?.size || 'Standard'} | Color: {item?.color || 'Standard'}</p>
                           </div>
-                          <span className="font-medium text-luxury-dark">Qty: {item.quantity}</span>
-                          <span className="font-bold text-luxury-dark">Rs. {item.price}</span>
+                          <span className="font-medium text-luxury-dark">Qty: {item?.quantity || 1}</span>
+                          <span className="font-bold text-luxury-dark">Rs. {item?.price || 0}</span>
                         </div>
                       ))}
                     </div>
 
                     <div className="flex justify-between border-t border-neutral-100 pt-3 font-semibold text-luxury-dark">
                       <span>Total Amount:</span>
-                      <span>Rs. {o.summary.total}</span>
+                      <span>Rs. {o?.summary?.total ?? o?.total ?? 0}</span>
                     </div>
                   </div>
                 ))}
