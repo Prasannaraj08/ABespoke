@@ -36,7 +36,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, loading = fa
     );
   }
 
-  if (products.length === 0) {
+  const uniqueProducts = Array.from(
+    new Map((products || []).map(p => [p.id, p])).values()
+  );
+
+  if (uniqueProducts.length === 0) {
     return (
       <div className="text-center py-20 px-4 bg-white rounded-xl border border-neutral-100/60 shadow-sm max-w-2xl mx-auto my-8">
         <h3 className="font-serif text-xl text-luxury-dark mb-2">No styles found</h3>
@@ -49,7 +53,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, loading = fa
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {products.map(product => (
+      {uniqueProducts.map(product => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>

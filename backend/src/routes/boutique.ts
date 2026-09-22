@@ -406,12 +406,15 @@ router.get('/portfolio', authenticateToken, requireBoutique, async (req: any, re
 
 router.post('/portfolio', authenticateToken, requireBoutique, validateBody(portfolioItemSchema), async (req: any, res) => {
   try {
+    const profile = await BoutiqueProfileModel.findByPk(req.user.id);
+    const boutiqueBrand = profile?.boutiqueName || req.user.name || 'Boutique Collection';
+
     const newItem = await PortfolioModel.create({
       id: `port_${Date.now()}`,
       boutiqueId: req.user.id,
       images: Array.isArray(req.body.images) && req.body.images.length > 0 
         ? req.body.images 
-        : ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'],
+        : ['https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&auto=format&fit=crop&q=80'],
       designName: req.body.designName,
       category: req.body.category,
       description: req.body.description || '',
@@ -420,6 +423,33 @@ router.post('/portfolio', authenticateToken, requireBoutique, validateBody(portf
       completionTime: req.body.completionTime || '3-5 Days',
       customerReview: ''
     });
+
+    // Make boutique lookbook portfolio item immediately visible in Collections
+    await ProductModel.upsert({
+      id: `prod_port_${newItem.id}`,
+      title: newItem.designName,
+      brand: boutiqueBrand,
+      description: newItem.description || `Bespoke custom creation: ${newItem.designName} by ${boutiqueBrand}. Custom tailored to precision.`,
+      price: Number(req.body.price) || 4999,
+      discount: 0,
+      rating: 5.0,
+      reviewsCount: 0,
+      sizes: ['Custom Measurement', 'S', 'M', 'L', 'XL'],
+      colors: ['Custom Bespoke'],
+      images: newItem.images,
+      category: newItem.category || 'Kurtis',
+      gender: ['Sarees', 'Lehengas', 'Kurtis', 'Half Sarees'].includes(newItem.category) ? 'women' : 'men',
+      stock: 10,
+      fabric: newItem.fabric || 'Fine Fabric',
+      fit: 'Bespoke Custom Fit',
+      occasion: 'Festive & Formal',
+      pattern: newItem.stitchingType || 'Bespoke Handcrafted',
+      trending: true,
+      paused: false,
+      stockStatus: 'in_stock',
+      createdAt: new Date().toISOString()
+    });
+
     res.status(201).json(newItem.get({ plain: true }));
   } catch (err) {
     console.error('Create portfolio error:', err);
@@ -437,6 +467,9 @@ router.delete('/portfolio/:id', authenticateToken, requireBoutique, async (req: 
     }
 
     await item.destroy();
+    // Clean up collection product
+    await ProductModel.destroy({ where: { id: `prod_port_${item.id}` } });
+
     res.status(200).json({ message: 'Portfolio item deleted successfully' });
   } catch (err) {
     console.error('Delete portfolio error:', err);

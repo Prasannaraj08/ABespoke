@@ -1,7 +1,8 @@
 import { Router, Response } from 'express';
 import { 
   DesignerProfile as DesignerModel,
-  CustomizationRequest as CustomizationModel 
+  CustomizationRequest as CustomizationModel,
+  Product as ProductModel
 } from '../db/models';
 import { authenticateToken } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
@@ -73,6 +74,38 @@ router.put('/profile', authenticateToken, requireDesigner, validateBody(designer
       userId: req.user.id, // Immutable
       verified: profile.verified // Admin approval required: cannot self-verify!
     });
+
+    // If verified, sync collections to Product catalog so all works appear in Collections
+    if (profile.verified && portfolioImgs.length > 0) {
+      for (let i = 0; i < portfolioImgs.length; i++) {
+        const img = portfolioImgs[i];
+        const title = collections[i] || `${profile.designerName} Couture Piece ${i + 1}`;
+        await ProductModel.upsert({
+          id: `prod_dsg_${profile.userId}_${i}`,
+          title,
+          brand: profile.designerName || 'Designer Label',
+          description: `Exclusive haute couture garment from ${profile.designerName}'s private lookbook.`,
+          price: 8999,
+          discount: 0,
+          rating: 5.0,
+          reviewsCount: 0,
+          sizes: ['Custom Sizing', 'S', 'M', 'L'],
+          colors: ['Designer Exclusive'],
+          images: [img],
+          category: 'Lehengas',
+          gender: 'women',
+          stock: 5,
+          fabric: 'Haute Couture Silk',
+          fit: 'Custom Tailored Fit',
+          occasion: 'Bridal & Gala',
+          pattern: 'Exclusive Designer Embroidery',
+          trending: true,
+          paused: false,
+          stockStatus: 'in_stock',
+          createdAt: new Date().toISOString()
+        });
+      }
+    }
 
     return res.status(200).json({
       success: true,
