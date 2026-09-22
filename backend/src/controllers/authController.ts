@@ -256,7 +256,8 @@ export async function login(req: AuthenticatedRequest, res: Response) {
 
     let isMatch = false;
     try {
-      isMatch = await bcrypt.compare(password, user.passwordHash);
+      const storedHash: string = (user as any).getDataValue?.('passwordHash') || (user as any).get?.('passwordHash') || user.passwordHash || '';
+      isMatch = await bcrypt.compare(password, storedHash);
     } catch (passErr: any) {
       logAuthEvent('AUTH_PASSWORD_VERIFICATION_FAILED', { requestId, email: cleanEmail, failureReason: 'Bcrypt hash comparison error', durationMs: Date.now() - startTime });
       return formatErrorResponse(res, 500, 5000, 'Server error during password verification', requestId);
