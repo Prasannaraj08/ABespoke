@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, LogOut, ChevronDown, Menu, X, Command } from 'lucide-react';
+import { Search, Heart, ShoppingBag, LogOut, ChevronDown, Menu, X, Command, Palette } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -58,6 +58,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onCartClick }) => {
               Atelier Collections
             </Link>
           </div>
+
+          {/* Prominent Role-Specific Portal Access */}
+          {isBoutique && (
+            <Link 
+              to="/boutique" 
+              className="hidden sm:flex items-center gap-1.5 bg-[#C79A4A]/10 hover:bg-[#C79A4A] text-[#C79A4A] hover:text-white border border-[#C79A4A]/40 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs"
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>Boutique Dashboard</span>
+            </Link>
+          )}
+          {isDesigner && (
+            <Link 
+              to="/designer" 
+              className="hidden sm:flex items-center gap-1.5 bg-[#3A5040]/10 hover:bg-[#3A5040] text-[#3A5040] hover:text-white border border-[#3A5040]/40 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs"
+            >
+              <Palette className="w-3.5 h-3.5" />
+              <span>Designer Dashboard</span>
+            </Link>
+          )}
+          {isAdmin && (
+            <Link 
+              to="/admin" 
+              className="hidden sm:flex items-center gap-1.5 bg-gray-900 hover:bg-black text-amber-400 border border-amber-400/40 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs"
+            >
+              <span>👑 Admin Dashboard</span>
+            </Link>
+          )}
         </div>
 
         {/* Center: Command Palette / Search Trigger */}
@@ -189,9 +217,32 @@ export const Navbar: React.FC<NavbarProps> = ({ onCartClick }) => {
 
         {/* Mobile Drawer */}
         {mobileMenuOpen && (
-          <div className="absolute top-[64px] left-0 w-full bg-white border-b border-[#ECE8E2] shadow-2xl p-6 flex flex-col gap-4 lg:hidden z-40 text-xs font-sans tracking-wider uppercase font-semibold">
+          <div className="absolute top-[64px] left-0 w-full bg-white border-b border-[#ECE8E2] shadow-2xl p-6 flex flex-col gap-3 lg:hidden z-40 text-xs font-sans tracking-wider uppercase font-semibold">
             <Link to="/catalog?gender=men" onClick={() => setMobileMenuOpen(false)} className="py-2 border-b border-[#ECE8E2]">Men</Link>
             <Link to="/catalog?gender=women" onClick={() => setMobileMenuOpen(false)} className="py-2 border-b border-[#ECE8E2]">Women</Link>
+            <Link to="/catalog" onClick={() => setMobileMenuOpen(false)} className="py-2 border-b border-[#ECE8E2] text-[#3A5040]">Atelier Collections</Link>
+            
+            {isBoutique && (
+              <Link to="/boutique" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-[#ECE8E2] text-[#C79A4A] font-bold flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4" /> Boutique Dashboard
+              </Link>
+            )}
+            {isDesigner && (
+              <Link to="/designer" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-[#ECE8E2] text-[#3A5040] font-bold flex items-center gap-2">
+                <Palette className="w-4 h-4" /> Designer Dashboard
+              </Link>
+            )}
+            {isAdmin && (
+              <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-[#ECE8E2] text-amber-600 font-bold flex items-center gap-2">
+                👑 Admin Dashboard
+              </Link>
+            )}
+            {user && (
+              <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-[#ECE8E2] text-gray-800 font-bold flex items-center gap-2">
+                👤 My Profile & Orders
+              </Link>
+            )}
+
             <button
               onClick={() => { setMobileMenuOpen(false); setCommandPaletteOpen(true); }}
               className="w-full flex items-center justify-between bg-[#F8F6F2] p-3 rounded-xl text-[#6B7280] text-left mt-1"

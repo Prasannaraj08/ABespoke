@@ -494,6 +494,48 @@ export async function googleLogin(req: AuthenticatedRequest, res: Response) {
         }
       });
     } else {
+      // If user exists as a customer ('user') and now explicitly logs in via Boutique or Designer portal:
+      if (user.role === 'user' && (requestedRole === 'boutique' || requestedRole === 'designer')) {
+        await sequelize.transaction(async (t) => {
+          await user!.update({ role: requestedRole }, { transaction: t });
+          user!.role = requestedRole;
+
+          if (requestedRole === 'boutique') {
+            const existingBoutique = await BoutiqueProfileModel.findByPk(user!.id, { transaction: t });
+            if (!existingBoutique) {
+              await BoutiqueProfileModel.create({
+                userId: user!.id,
+                boutiqueName: user!.name || 'Boutique Partner',
+                about: 'Curated luxury boutique collection.',
+                address: '',
+                contactNumber: '',
+                email: cleanEmail,
+                socialLinks: { instagram: '', facebook: '', twitter: '' },
+                businessHours: '09:00 AM - 08:00 PM',
+                experienceYears: 0,
+                specialization: 'Bridal & Party Wear',
+                verified: false,
+                deliveryOptions: 'Standard Courier',
+                pricingPolicy: 'Standard Retail',
+                followersCount: 0,
+              }, { transaction: t });
+            }
+          } else if (requestedRole === 'designer') {
+            const existingDesigner = await DesignerModel.findByPk(user!.id, { transaction: t });
+            if (!existingDesigner) {
+              await DesignerModel.create({
+                userId: user!.id,
+                designerName: user!.name || 'Fashion Designer Atelier',
+                portfolioImages: [],
+                exclusiveCollections: [],
+                about: 'Haute couture fashion designer.',
+                verified: false,
+                customizationTerms: 'Custom sizes and fit adjustments upon request.',
+              }, { transaction: t });
+            }
+          }
+        });
+      }
       verified = await getVerifiedStatus(user);
     }
 
