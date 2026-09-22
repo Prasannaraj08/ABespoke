@@ -5,7 +5,7 @@ import {
   User, Copy, Calendar, Award, Briefcase, Search, Bell, CheckCheck 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { boutiqueAPI, adminAPI, productsAPI } from '../services/api';
+import { boutiqueAPI } from '../services/api';
 import ImageUpload from '../components/ImageUpload';
 
 export const BoutiqueDashboard: React.FC = () => {
@@ -78,35 +78,35 @@ export const BoutiqueDashboard: React.FC = () => {
   const [tailorPayload, setTailorPayload] = useState({
     name: '',
     photoUrl: '',
-    experience: '5 Years',
-    specialization: 'Custom Blouse & Lehenga Stitching',
+    experience: '',
+    specialization: '',
     certifications: '',
-    workingHours: '09:00 AM - 06:00 PM',
-    languages: 'English, Hindi',
+    workingHours: '',
+    languages: '',
     bio: '',
-    projectsCount: '150'
+    projectsCount: ''
   });
 
   const [portfolioPayload, setPortfolioPayload] = useState({
     designName: '',
     category: 'Lehenga',
     description: '',
-    fabric: 'Velvet',
-    stitchingType: 'Bespoke Custom Stitch',
-    completionTime: '5 Days',
+    fabric: '',
+    stitchingType: '',
+    completionTime: '',
     images: [] as string[],
     customerReview: ''
   });
 
   const [hiringPayload, setHiringPayload] = useState({
-    title: 'Senior Master Tailor Wanted',
-    skills: 'Pattern cutting, heavy embroidery hand stitching',
-    experience: '5+ Years',
+    title: '',
+    skills: '',
+    experience: '',
     employmentType: 'Full-time',
-    salaryRange: '25,000 - 35,000 INR Monthly',
-    location: 'Mumbai Boutique Store',
+    salaryRange: '',
+    location: '',
     vacancies: '1',
-    closingDate: '2026-08-31'
+    closingDate: ''
   });
 
   useEffect(() => {
@@ -147,12 +147,9 @@ export const BoutiqueDashboard: React.FC = () => {
       const ords = await boutiqueAPI.getOrders();
       setOrders(toArr(ords));
 
-      // Filter products belonging to this boutique brand
-      const allProds = await productsAPI.getProducts({});
-      const productsArray = Array.isArray(allProds) ? allProds : (Array.isArray(allProds?.products) ? allProds.products : (Array.isArray(allProds?.data) ? allProds.data : []));
-      const boutiqueName = (prof?.boutiqueName || prof?.profile?.boutiqueName || '').toLowerCase();
-      const boutiqueProds = productsArray.filter((p: any) => p && p.brand && p.brand.toLowerCase() === boutiqueName);
-      setProducts(boutiqueProds);
+      // Boutique Products
+      const boutiqueProds = await boutiqueAPI.getProducts();
+      setProducts(toArr(boutiqueProds));
     } catch (err) {
       console.error('Failed to load Boutique Seller Portal details:', err);
     } finally {
@@ -267,17 +264,20 @@ export const BoutiqueDashboard: React.FC = () => {
     try {
       const finalPayload = {
         ...productPayload,
+        brand: productPayload.brand || profile.boutiqueName || user?.name || 'Boutique Collection',
         price: Number(productPayload.price),
-        discount: Number(productPayload.discount),
-        stock: Number(productPayload.stock),
+        discount: Number(productPayload.discount || 0),
+        stock: Number(productPayload.stock || 0),
+        sizes: ['XS', 'S', 'M', 'L', 'XL'],
+        colors: ['Standard'],
         images: productPayload.images.length > 0 ? productPayload.images : ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600']
       };
 
       if (editingProductId) {
-        await adminAPI.updateProduct(editingProductId, finalPayload);
+        await boutiqueAPI.updateProduct(editingProductId, finalPayload);
         alert('Product modified successfully.');
       } else {
-        await adminAPI.createProduct(finalPayload);
+        await boutiqueAPI.createProduct(finalPayload);
         alert('Product published successfully.');
       }
       setShowProductForm(false);
@@ -320,10 +320,10 @@ export const BoutiqueDashboard: React.FC = () => {
         ...prod,
         id: undefined,
         title: `Copy of ${prod.title}`,
-        sku: `${prod.sku || 'SKU'}_COPY`,
-        createdAt: new Date().toISOString()
+        sku: `${prod.sku || 'SKU'}_COPY_${Date.now().toString().slice(-4)}`,
+        createdAt: undefined
       };
-      await adminAPI.createProduct(duplicatePayload);
+      await boutiqueAPI.createProduct(duplicatePayload);
       loadData();
       alert('Product duplicated successfully.');
     } catch (err) {
@@ -333,8 +333,7 @@ export const BoutiqueDashboard: React.FC = () => {
 
   const handleTogglePauseProduct = async (prod: any) => {
     try {
-      const updated = { ...prod, paused: !prod.paused };
-      await adminAPI.updateProduct(prod.id, updated);
+      await boutiqueAPI.updateProduct(prod.id, { paused: !prod.paused });
       loadData();
       alert(prod.paused ? 'Listing activated.' : 'Listing paused.');
     } catch (err) {
@@ -344,8 +343,7 @@ export const BoutiqueDashboard: React.FC = () => {
 
   const handleStockStatusChange = async (prod: any, status: any) => {
     try {
-      const updated = { ...prod, stockStatus: status };
-      await adminAPI.updateProduct(prod.id, updated);
+      await boutiqueAPI.updateProduct(prod.id, { stockStatus: status });
       loadData();
       alert(`Stock status changed to ${status}`);
     } catch (err) {
@@ -355,7 +353,7 @@ export const BoutiqueDashboard: React.FC = () => {
 
   const handleDeleteProduct = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this listing?')) {
-      await adminAPI.deleteProduct(id);
+      await boutiqueAPI.deleteProduct(id);
       loadData();
     }
   };
@@ -402,13 +400,40 @@ export const BoutiqueDashboard: React.FC = () => {
     );
   }
 
-  // Analytics helper metrics
-  const activeProducts = safeProducts.filter(p => p && !p.paused).length || 14;
-  const outOfStockProducts = safeProducts.filter(p => p && p.stock <= 0).length || 2;
-  const pendingOrders = safeOrders.filter(o => o && (o.orderStatus === 'Placed' || o.orderStatus === 'Shipped')).length || 3;
-  const completedOrders = safeOrders.filter(o => o && o.orderStatus === 'Delivered').length || 28;
-  const totalRevenue = safeOrders.reduce((acc, o) => acc + (o && o.orderStatus === 'Delivered' ? (o.summary?.total || 0) : 0), 0) || 430000;
+  // Analytics helper metrics (zero-based real metrics)
+  const activeProducts = safeProducts.filter(p => p && !p.paused).length;
+  const outOfStockProducts = safeProducts.filter(p => p && Number(p.stock) <= 0).length;
+  const pendingOrders = safeOrders.filter(o => o && (o.orderStatus === 'Placed' || o.orderStatus === 'Packed' || o.orderStatus === 'Shipped')).length;
+  const completedOrders = safeOrders.filter(o => o && o.orderStatus === 'Delivered').length;
+  const totalRevenue = safeOrders.reduce((acc, o) => acc + (o && o.orderStatus === 'Delivered' ? (Number(o.summary?.total) || 0) : 0), 0);
   const unreadNotifCount = safeNotifications.filter(n => n && !n.read).length;
+
+  // Dynamic monthly revenue for the past 6 calendar months
+  const monthlyRevenueData = React.useMemo(() => {
+    const months: { label: string; yearMonth: string; revenue: number }[] = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = d.toLocaleString('en-US', { month: 'short' });
+      const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      months.push({ label, yearMonth, revenue: 0 });
+    }
+
+    safeOrders.forEach(o => {
+      if (o && (o.orderStatus === 'Delivered' || o.paymentStatus === 'Paid') && o.createdAt) {
+        const orderDate = new Date(o.createdAt);
+        const ym = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+        const match = months.find(m => m.yearMonth === ym);
+        if (match) {
+          match.revenue += Number(o.summary?.total) || 0;
+        }
+      }
+    });
+
+    const maxRevenue = Math.max(...months.map(m => m.revenue), 1000);
+    const hasAnySales = months.some(m => m.revenue > 0);
+    return { months, maxRevenue, hasAnySales };
+  }, [safeOrders]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 font-sans space-y-8">
@@ -423,8 +448,11 @@ export const BoutiqueDashboard: React.FC = () => {
                 <img src={profile.logoUrl} alt="Logo" className="w-16 h-16 rounded-full border-2 border-white object-cover shadow-md" />
               )}
               <div>
-                <h1 className="font-serif text-2xl md:text-2xl md:text-3xl font-bold uppercase tracking-wider">{profile.boutiqueName}</h1>
-                <p className="text-xs font-light text-zinc-200 mt-1">{profile.specialization} Showcase • Mumbai</p>
+                <h1 className="font-serif text-2xl md:text-3xl font-bold uppercase tracking-wider">{profile.boutiqueName || user?.name || 'Boutique Store'}</h1>
+                <p className="text-xs font-light text-zinc-200 mt-1">
+                  {profile.specialization ? `${profile.specialization} Showcase` : 'Designer Studio'}
+                  {profile.address ? ` • ${profile.address}` : ''}
+                </p>
               </div>
             </div>
           </div>
@@ -435,22 +463,38 @@ export const BoutiqueDashboard: React.FC = () => {
             <img src={profile.logoUrl} alt="Logo" className="w-20 h-20 rounded-full border object-cover shadow" />
           )}
           <div>
-            <h1 className="font-serif text-3xl font-bold text-luxury-dark uppercase tracking-wide">{profile.boutiqueName}</h1>
-            <p className="text-xs text-luxury-muted mt-1 font-light">{profile.specialization || 'Premium Tailoring Boutique'}</p>
+            <h1 className="font-serif text-3xl font-bold text-luxury-dark uppercase tracking-wide">{profile.boutiqueName || user?.name || 'Boutique Store'}</h1>
+            <p className="text-xs text-luxury-muted mt-1 font-light">{profile.specialization || 'Boutique Tailoring Studio'}</p>
           </div>
         </div>
       )}
 
       {/* Verification Warning Banner */}
       {!profile.verified && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4 text-amber-800 shadow-sm leading-relaxed">
-          <ShieldAlert className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-xs space-y-1 font-sans">
-            <h4 className="font-bold uppercase tracking-wider text-[10px]">Verification Pending Approval</h4>
-            <p className="font-light">
-              Your Boutique Seller Account is currently under review. Publishings and orders management are fully functional for testing, but listing status approvals are monitored.
-            </p>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-800 shadow-sm leading-relaxed">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs space-y-1 font-sans">
+              <h4 className="font-bold uppercase tracking-wider text-[10px]">Verification Under Review</h4>
+              <p className="font-light">
+                Your Boutique Seller Account is in setup mode. You can publish collections and fulfill orders immediately.
+              </p>
+            </div>
           </div>
+          <button
+            onClick={async () => {
+              try {
+                const updated = await boutiqueAPI.updateProfile({ ...profile, verified: true });
+                setProfile(updated?.profile || updated || { ...profile, verified: true });
+                alert('Boutique verified badge enabled.');
+              } catch (e) {
+                alert('Failed to update verification status.');
+              }
+            }}
+            className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-3 py-1.5 rounded-lg shadow-sm"
+          >
+            Activate Verified Badge
+          </button>
         </div>
       )}
 
@@ -513,53 +557,56 @@ export const BoutiqueDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Pure SVG Bar Chart (zero external dependencies, compiles natively in strict TS) */}
+            {/* Dynamic Monthly Revenue Analytics */}
             <div className="border border-neutral-200 rounded-xl p-6 space-y-4">
-              <h3 className="font-serif text-base font-bold text-luxury-dark uppercase tracking-wider">Monthly Revenue Analytics</h3>
-              <div className="w-full h-48 flex items-end justify-between gap-2.5 pt-6 relative border-b border-zinc-200">
-                
-                {/* SVG Bar chart */}
-                <svg className="w-full h-full" viewBox="0 0 400 120" preserveAspectRatio="none">
-                  {/* Grid Lines */}
-                  <line x1="0" y1="20" x2="400" y2="20" stroke="#f4f4f4" strokeWidth="1" />
-                  <line x1="0" y1="60" x2="400" y2="60" stroke="#f4f4f4" strokeWidth="1" />
-                  <line x1="0" y1="100" x2="400" y2="100" stroke="#f4f4f4" strokeWidth="1" />
-                  
-                  {/* Bars */}
-                  {[
-                    { label: 'Jan', val: 40 },
-                    { label: 'Feb', val: 55 },
-                    { label: 'Mar', val: 75 },
-                    { label: 'Apr', val: 60 },
-                    { label: 'May', val: 90 },
-                    { label: 'Jun', val: 110 }
-                  ].map((d, i) => {
-                    const x = 30 + i * 60;
-                    const height = d.val;
-                    const y = 120 - height;
-                    return (
-                      <g key={i}>
-                        {/* Bar */}
-                        <rect x={x} y={y} width="24" height={height} fill="#141416" rx="4" className="hover:fill-luxury-gold transition-colors duration-300" />
-                        {/* Text Label */}
-                        <text x={x + 12} y="115" fontSize="7" fill="#8C8273" textAnchor="middle" fontWeight="bold">{d.label}</text>
-                        {/* Text Value */}
-                        <text x={x + 12} y={y - 5} fontSize="6.5" fill="#141416" textAnchor="middle">{d.val * 1000}</text>
-                      </g>
-                    );
-                  })}
-                </svg>
+              <div className="flex justify-between items-center">
+                <h3 className="font-serif text-base font-bold text-luxury-dark uppercase tracking-wider">Monthly Revenue Analytics</h3>
+                <span className="text-xs text-luxury-muted font-mono">Last 6 Months</span>
               </div>
+
+              {!monthlyRevenueData.hasAnySales ? (
+                <div className="py-10 text-center space-y-2 border border-dashed border-neutral-200 rounded-lg bg-[#FAF9F6]">
+                  <p className="text-xs text-luxury-dark font-medium">No sales transactions recorded yet</p>
+                  <p className="text-[11px] text-luxury-muted max-w-md mx-auto font-light">
+                    Real-time monthly revenue analytics will automatically populate here as customer orders are placed and delivered.
+                  </p>
+                </div>
+              ) : (
+                <div className="w-full h-48 flex items-end justify-between gap-2.5 pt-6 relative border-b border-zinc-200">
+                  <svg className="w-full h-full" viewBox="0 0 400 120" preserveAspectRatio="none">
+                    {/* Grid Lines */}
+                    <line x1="0" y1="20" x2="400" y2="20" stroke="#f4f4f4" strokeWidth="1" />
+                    <line x1="0" y1="60" x2="400" y2="60" stroke="#f4f4f4" strokeWidth="1" />
+                    <line x1="0" y1="100" x2="400" y2="100" stroke="#f4f4f4" strokeWidth="1" />
+                    
+                    {/* Dynamic Bars */}
+                    {monthlyRevenueData.months.map((d, i) => {
+                      const x = 30 + i * 60;
+                      const barHeight = d.revenue > 0 ? Math.max((d.revenue / monthlyRevenueData.maxRevenue) * 80, 6) : 2;
+                      const y = 100 - barHeight;
+                      return (
+                        <g key={i}>
+                          <rect x={x} y={y} width="24" height={barHeight} fill={d.revenue > 0 ? "#141416" : "#e5e7eb"} rx="4" className="hover:fill-luxury-gold transition-colors duration-300" />
+                          <text x={x + 12} y="115" fontSize="7" fill="#8C8273" textAnchor="middle" fontWeight="bold">{d.label}</text>
+                          {d.revenue > 0 && (
+                            <text x={x + 12} y={y - 4} fontSize="6" fill="#141416" textAnchor="middle">₹{d.revenue.toLocaleString()}</text>
+                          )}
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+              )}
             </div>
 
             {/* Quick Profile Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="border border-neutral-200 rounded-xl p-6 space-y-3 text-xs text-sans bg-[#FAF9F6]">
                 <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-luxury-gold">Boutique Contact Info</h4>
-                <p><strong>Support Email:</strong> {profile.email || 'boutique@example.com'}</p>
+                <p><strong>Support Email:</strong> {profile.email || user?.email || 'Not configured'}</p>
                 <p><strong>Mobile/Phone:</strong> {profile.contactNumber || 'Not configured'}</p>
-                <p><strong>Business Hours:</strong> {profile.businessHours || '10:00 AM - 08:30 PM'}</p>
-                <p><strong>Years Established:</strong> {profile.experienceYears} Years</p>
+                <p><strong>Business Hours:</strong> {profile.businessHours || 'Not configured'}</p>
+                <p><strong>Years Established:</strong> {profile.experienceYears ? `${profile.experienceYears} Years` : 'Newly Established'}</p>
               </div>
               <div className="border border-neutral-200 rounded-xl p-6 space-y-3 text-xs text-sans bg-[#FAF9F6]">
                 <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-luxury-gold">Active Team Statistics</h4>
@@ -810,9 +857,24 @@ export const BoutiqueDashboard: React.FC = () => {
             )}
 
             {/* List Tailors */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tailors.map((t) => (
-                <div key={t.id} className="border border-neutral-200 rounded-xl overflow-hidden shadow-sm hover:shadow bg-[#FAF9F6] relative flex flex-col">
+            {tailors.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-neutral-300 rounded-xl space-y-3 bg-[#FAF9F6]">
+                <Award className="w-10 h-10 mx-auto text-luxury-muted" />
+                <h4 className="font-serif font-bold text-luxury-dark text-base">No Tailors Registered Yet</h4>
+                <p className="text-xs text-luxury-muted max-w-md mx-auto">
+                  Add master tailors and artisans to showcase your bespoke tailoring team and craftsmanship.
+                </p>
+                <button
+                  onClick={() => setShowTailorForm(true)}
+                  className="bg-luxury-dark hover:bg-luxury-gold text-white font-semibold text-xs px-5 py-2.5 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Add First Tailor
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tailors.map((t) => (
+                  <div key={t.id} className="border border-neutral-200 rounded-xl overflow-hidden shadow-sm hover:shadow bg-[#FAF9F6] relative flex flex-col">
                   <button
                     onClick={() => handleDeleteTailor(t.id)}
                     className="absolute right-4 top-4 bg-white/80 p-1.5 rounded-full text-red-500 hover:bg-red-50"
@@ -836,6 +898,7 @@ export const BoutiqueDashboard: React.FC = () => {
                 </div>
               ))}
             </div>
+            )}
           </div>
         )}
 
@@ -938,35 +1001,51 @@ export const BoutiqueDashboard: React.FC = () => {
             )}
 
             {/* Gallery lookbook items */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {portfolio.map((p) => (
-                <div key={p.id} className="border border-neutral-200 rounded-xl overflow-hidden bg-white shadow-sm flex flex-col relative group">
-                  <button
-                    onClick={() => handleDeletePortfolio(p.id)}
-                    className="absolute right-4 top-4 bg-white/80 p-1.5 rounded-full text-red-500 hover:bg-red-50 z-10"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                  <div className="h-56 overflow-hidden">
-                    <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'} alt={p.designName} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                  </div>
-                  <div className="p-4 flex-grow space-y-2.5 text-xs text-sans">
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-serif text-sm font-bold text-luxury-dark">{p.designName}</h4>
-                      <span className="bg-luxury-cream text-luxury-gold px-2 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold">
-                        {p.category}
-                      </span>
+            {portfolio.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-neutral-300 rounded-xl space-y-3 bg-[#FAF9F6]">
+                <Briefcase className="w-10 h-10 mx-auto text-luxury-muted" />
+                <h4 className="font-serif font-bold text-luxury-dark text-base">No Lookbook Designs Yet</h4>
+                <p className="text-xs text-luxury-muted max-w-md mx-auto">
+                  Showcase bespoke tailoring masterpieces, lehengas, and couture stitches to inspire your clients.
+                </p>
+                <button
+                  onClick={() => setShowPortfolioForm(true)}
+                  className="bg-luxury-dark hover:bg-luxury-gold text-white font-semibold text-xs px-5 py-2.5 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Add First Lookbook Design
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {portfolio.map((p) => (
+                  <div key={p.id} className="border border-neutral-200 rounded-xl overflow-hidden bg-white shadow-sm flex flex-col relative group">
+                    <button
+                      onClick={() => handleDeletePortfolio(p.id)}
+                      className="absolute right-4 top-4 bg-white/80 p-1.5 rounded-full text-red-500 hover:bg-red-50 z-10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <div className="h-56 overflow-hidden">
+                      <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'} alt={p.designName} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                     </div>
-                    <p className="text-zinc-500 font-light leading-relaxed">{p.description}</p>
-                    <div className="border-t pt-2 grid grid-cols-2 gap-2 text-zinc-500 font-light">
-                      <p><strong>Fabric:</strong> {p.fabric}</p>
-                      <p><strong>Stitching:</strong> {p.stitchingType}</p>
-                      <p className="col-span-2"><strong>Completed in:</strong> {p.completionTime}</p>
+                    <div className="p-4 flex-grow space-y-2.5 text-xs text-sans">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-serif text-sm font-bold text-luxury-dark">{p.designName}</h4>
+                        <span className="bg-luxury-cream text-luxury-gold px-2 py-0.5 rounded text-[8px] uppercase tracking-wider font-bold">
+                          {p.category}
+                        </span>
+                      </div>
+                      <p className="text-zinc-500 font-light leading-relaxed">{p.description}</p>
+                      <div className="border-t pt-2 grid grid-cols-2 gap-2 text-zinc-500 font-light">
+                        <p><strong>Fabric:</strong> {p.fabric}</p>
+                        <p><strong>Stitching:</strong> {p.stitchingType}</p>
+                        <p className="col-span-2"><strong>Completed in:</strong> {p.completionTime}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -1165,87 +1244,133 @@ export const BoutiqueDashboard: React.FC = () => {
             )}
 
             {/* List products */}
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-neutral-200 text-left text-xs text-sans">
-                <thead>
-                  <tr className="bg-[#FAF9F6]">
-                    <th className="p-3 border border-neutral-200">Style</th>
-                    <th className="p-3 border border-neutral-200">SKU</th>
-                    <th className="p-3 border border-neutral-200">Category</th>
-                    <th className="p-3 border border-neutral-200">Price</th>
-                    <th className="p-3 border border-neutral-200">Stock</th>
-                    <th className="p-3 border border-neutral-200">Stock Status</th>
-                    <th className="p-3 border border-neutral-200">State</th>
-                    <th className="p-3 border border-neutral-200 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EBE6DC]">
-                  {getFilteredProducts().map((p) => (
-                    <tr key={p.id} className="hover:bg-[#FAF9F6] transition-colors">
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'} alt="Icon" className="w-10 h-10 object-cover rounded-lg border" />
-                          <div>
-                            <span className="font-semibold text-luxury-dark block">{p.title}</span>
-                            <span className="text-[10px] text-luxury-muted uppercase">{p.fabric}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-3 font-mono text-[10px]">{p.sku || 'N/A'}</td>
-                      <td className="p-3 uppercase font-medium">{p.category}</td>
-                      <td className="p-3">Rs. {p.price}</td>
-                      <td className="p-3 font-bold">{p.stock} units</td>
-                      <td className="p-3">
-                        <select
-                          value={p.stockStatus || 'in_stock'}
-                          onChange={(e) => handleStockStatusChange(p, e.target.value)}
-                          className="bg-white border rounded p-1 text-[10px] uppercase font-bold"
-                        >
-                          <option value="in_stock">In Stock</option>
-                          <option value="out_of_stock">Out of Stock</option>
-                          <option value="limited_stock">Limited Stock</option>
-                          <option value="available_soon">Available Soon</option>
-                          <option value="discontinued">Discontinued</option>
-                        </select>
-                      </td>
-                      <td className="p-3">
-                        <button
-                          onClick={() => handleTogglePauseProduct(p)}
-                          className={`px-2 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold ${
-                            p.paused
-                              ? 'bg-amber-50 text-amber-600 border border-amber-200'
-                              : 'bg-green-50 text-green-600 border border-green-200'
-                          }`}
-                        >
-                          {p.paused ? 'Paused' : 'Active'}
-                        </button>
-                      </td>
-                      <td className="p-3 text-right flex justify-end gap-2">
-                        <button
-                          onClick={() => handleDuplicateProduct(p)}
-                          className="p-1.5 border border-zinc-200 rounded-lg hover:border-luxury-gold hover:text-luxury-gold"
-                          title="Duplicate listing"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleEditProduct(p)}
-                          className="p-1.5 border border-zinc-200 rounded-lg hover:border-luxury-gold hover:text-luxury-gold"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(p.id)}
-                          className="p-1.5 border border-zinc-200 rounded-lg hover:border-red-50 hover:text-red-500"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
+            {getFilteredProducts().length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-neutral-300 rounded-xl space-y-3 bg-[#FAF9F6]">
+                <Package className="w-10 h-10 mx-auto text-luxury-muted" />
+                <h4 className="font-serif font-bold text-luxury-dark text-base">
+                  {safeProducts.length === 0 ? 'No Products Listed Yet' : 'No Products Match Filter'}
+                </h4>
+                <p className="text-xs text-luxury-muted max-w-md mx-auto">
+                  {safeProducts.length === 0 
+                    ? 'Start building your boutique catalog. Add your custom designs and ready collections to sell.'
+                    : 'Try adjusting your search query or status filter to see other listings.'}
+                </p>
+                {safeProducts.length === 0 && (
+                  <button
+                    onClick={() => {
+                      setShowProductForm(true);
+                      setEditingProductId(null);
+                      setProductPayload({
+                        title: '',
+                        brand: profile.boutiqueName || user?.name || 'My Boutique',
+                        category: 'Sarees',
+                        gender: 'women',
+                        price: '',
+                        discount: '0',
+                        stock: '',
+                        fabric: 'Silk',
+                        fit: 'Regular Fit',
+                        occasion: 'Festive',
+                        pattern: 'Solid',
+                        description: '',
+                        images: [],
+                        sku: `SKU_${Date.now().toString().substring(8)}`,
+                        deliveryTime: '3-5 Days',
+                        careInstructions: 'Dry Clean Only',
+                        returnPolicy: '7 Days Returns Allowed',
+                        paused: false,
+                        stockStatus: 'in_stock'
+                      });
+                    }}
+                    className="bg-luxury-dark hover:bg-luxury-gold text-white font-semibold text-xs px-5 py-2.5 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" /> Add Your First Product
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-neutral-200 text-left text-xs text-sans">
+                  <thead>
+                    <tr className="bg-[#FAF9F6]">
+                      <th className="p-3 border border-neutral-200">Style</th>
+                      <th className="p-3 border border-neutral-200">SKU</th>
+                      <th className="p-3 border border-neutral-200">Category</th>
+                      <th className="p-3 border border-neutral-200">Price</th>
+                      <th className="p-3 border border-neutral-200">Stock</th>
+                      <th className="p-3 border border-neutral-200">Stock Status</th>
+                      <th className="p-3 border border-neutral-200">State</th>
+                      <th className="p-3 border border-neutral-200 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-[#EBE6DC]">
+                    {getFilteredProducts().map((p) => (
+                      <tr key={p.id} className="hover:bg-[#FAF9F6] transition-colors">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'} alt="Icon" className="w-10 h-10 object-cover rounded-lg border" />
+                            <div>
+                              <span className="font-semibold text-luxury-dark block">{p.title}</span>
+                              <span className="text-[10px] text-luxury-muted uppercase">{p.fabric}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 font-mono text-[10px]">{p.sku || 'N/A'}</td>
+                        <td className="p-3 uppercase font-medium">{p.category}</td>
+                        <td className="p-3">Rs. {p.price}</td>
+                        <td className="p-3 font-bold">{p.stock} units</td>
+                        <td className="p-3">
+                          <select
+                            value={p.stockStatus || 'in_stock'}
+                            onChange={(e) => handleStockStatusChange(p, e.target.value)}
+                            className="bg-white border rounded p-1 text-[10px] uppercase font-bold"
+                          >
+                            <option value="in_stock">In Stock</option>
+                            <option value="out_of_stock">Out of Stock</option>
+                            <option value="limited_stock">Limited Stock</option>
+                            <option value="available_soon">Available Soon</option>
+                            <option value="discontinued">Discontinued</option>
+                          </select>
+                        </td>
+                        <td className="p-3">
+                          <button
+                            onClick={() => handleTogglePauseProduct(p)}
+                            className={`px-2 py-0.5 rounded text-[9px] uppercase tracking-wider font-bold ${
+                              p.paused
+                                ? 'bg-amber-50 text-amber-600 border border-amber-200'
+                                : 'bg-green-50 text-green-600 border border-green-200'
+                            }`}
+                          >
+                            {p.paused ? 'Paused' : 'Active'}
+                          </button>
+                        </td>
+                        <td className="p-3 text-right flex justify-end gap-2">
+                          <button
+                            onClick={() => handleDuplicateProduct(p)}
+                            className="p-1.5 border border-zinc-200 rounded-lg hover:border-luxury-gold hover:text-luxury-gold"
+                            title="Duplicate listing"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleEditProduct(p)}
+                            className="p-1.5 border border-zinc-200 rounded-lg hover:border-luxury-gold hover:text-luxury-gold"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProduct(p.id)}
+                            className="p-1.5 border border-zinc-200 rounded-lg hover:border-red-50 hover:text-red-500"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
@@ -1409,32 +1534,48 @@ export const BoutiqueDashboard: React.FC = () => {
             )}
 
             {/* List postings */}
-            <div className="space-y-4">
-              {hiring.map((h) => (
-                <div key={h.id} className="border border-neutral-200 rounded-xl p-5 bg-[#FAF9F6] flex flex-col sm:flex-row justify-between gap-4 text-xs">
-                  <div className="space-y-2">
-                    <h4 className="font-serif text-base font-bold text-luxury-dark">{h.title}</h4>
-                    <p className="text-luxury-gold font-bold uppercase tracking-wider text-[9px]">Location: {h.location} | Vacancies: {h.vacancies}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {h.skills?.map((sk: string, idx: number) => (
-                        <span key={idx} className="bg-white border border-zinc-200 px-2 py-0.5 rounded text-[9px]">
-                          {sk}
-                        </span>
-                      ))}
+            {hiring.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-neutral-300 rounded-xl space-y-3 bg-[#FAF9F6]">
+                <Calendar className="w-10 h-10 mx-auto text-luxury-muted" />
+                <h4 className="font-serif font-bold text-luxury-dark text-base">No Open Vacancies</h4>
+                <p className="text-xs text-luxury-muted max-w-md mx-auto">
+                  Looking to hire master tailors, pattern makers, or hand embroiders? Post vacancies here.
+                </p>
+                <button
+                  onClick={() => setShowHiringForm(true)}
+                  className="bg-luxury-dark hover:bg-luxury-gold text-white font-semibold text-xs px-5 py-2.5 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Post a Vacancy
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {hiring.map((h) => (
+                  <div key={h.id} className="border border-neutral-200 rounded-xl p-5 bg-[#FAF9F6] flex flex-col sm:flex-row justify-between gap-4 text-xs">
+                    <div className="space-y-2">
+                      <h4 className="font-serif text-base font-bold text-luxury-dark">{h.title}</h4>
+                      <p className="text-luxury-gold font-bold uppercase tracking-wider text-[9px]">Location: {h.location} | Vacancies: {h.vacancies}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {h.skills?.map((sk: string, idx: number) => (
+                          <span key={idx} className="bg-white border border-zinc-200 px-2 py-0.5 rounded text-[9px]">
+                            {sk}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-zinc-500 font-light">Experience Required: {h.experience} • Type: {h.employmentType} • Salary: {h.salaryRange}</p>
                     </div>
-                    <p className="text-zinc-500 font-light">Experience Required: {h.experience} • Type: {h.employmentType} • Salary: {h.salaryRange}</p>
+                    <div className="flex sm:flex-col justify-end items-end gap-2 shrink-0">
+                      <button
+                        onClick={() => handleDeleteHiring(h.id)}
+                        className="border border-red-200 text-red-500 hover:bg-red-50 px-3.5 py-1.5 rounded-xl uppercase tracking-wider font-bold text-[9px] flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex sm:flex-col justify-end items-end gap-2 shrink-0">
-                    <button
-                      onClick={() => handleDeleteHiring(h.id)}
-                      className="border border-red-200 text-red-500 hover:bg-red-50 px-3.5 py-1.5 rounded-xl uppercase tracking-wider font-bold text-[9px] flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" /> Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

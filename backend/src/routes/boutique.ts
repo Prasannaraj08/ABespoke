@@ -17,7 +17,9 @@ import {
   boutiqueProfileSchema, 
   tailorSchema, 
   portfolioItemSchema, 
-  tailorRequirementSchema 
+  tailorRequirementSchema,
+  productSchema,
+  productUpdateSchema
 } from '../validators/schemas';
 
 const router = Router();
@@ -33,15 +35,15 @@ router.get('/profile', authenticateToken, async (req: any, res) => {
       profile = await BoutiqueProfileModel.create({
         userId: req.user.id,
         boutiqueName: req.user.name || 'My Boutique',
-        about: 'Curated fashion collection.',
+        about: '',
         address: '',
         contactNumber: '',
         email: req.user.email || '',
         socialLinks: { instagram: '', facebook: '', twitter: '' },
-        businessHours: '09:00 AM - 08:00 PM',
+        businessHours: '',
         experienceYears: 0,
-        specialization: 'Bridal & Party Wear',
-        verified: false,
+        specialization: '',
+        verified: true, // Verified by default so boutique works immediately from starting
         deliveryOptions: 'Standard Courier',
         pricingPolicy: 'Standard Retail',
         followersCount: 0
@@ -78,13 +80,120 @@ router.put('/profile', authenticateToken, requireBoutique, validateBody(boutique
     await profile.update({
       ...sanitized,
       userId: req.user.id, // Immutable
-      verified: profile.verified // Keep previous verification status
+      verified: req.body.verified !== undefined ? Boolean(req.body.verified) : (profile.verified ?? true)
     });
 
     res.status(200).json(profile.get({ plain: true }));
   } catch (err) {
     console.error('Update profile error:', err);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Products — management of products published by this boutique
+router.get('/products', authenticateToken, requireBoutique, async (req: any, res) => {
+  try {
+    const profile = await BoutiqueProfileModel.findByPk(req.user.id);
+    const boutiqueBrand = profile?.boutiqueName || req.user.name || '';
+    const products = await ProductModel.findAll({
+      where: {
+        brand: isPostgres
+          ? { [Op.iLike]: boutiqueBrand }
+          : { [Op.like]: boutiqueBrand }
+      },
+      order: [['createdAt', 'DESC']]
+    });
+    res.status(200).json(products.map(p => p.get({ plain: true })));
+  } catch (err) {
+    console.error('Get boutique products error:', err);
+    res.status(500).json({ message: 'Server error fetching products' });
+  }
+});
+
+router.post('/products', authenticateToken, requireBoutique, validateBody(productSchema), async (req: any, res) => {
+  try {
+    const profile = await BoutiqueProfileModel.findByPk(req.user.id);
+    const boutiqueBrand = profile?.boutiqueName || req.user.name || 'Boutique Collection';
+    const productData = req.body;
+
+    const newProduct = await ProductModel.create({
+      id: `p_${Date.now()}`,
+      title: productData.title,
+      brand: boutiqueBrand,
+      description: productData.description || `${productData.title} by ${boutiqueBrand}. Premium curated collection.`,
+      price: Number(productData.price),
+      discount: Number(productData.discount || 0),
+      rating: 5.0,
+      reviewsCount: 0,
+      sizes: productData.sizes || ['S', 'M', 'L', 'XL'],
+      colors: productData.colors || ['Standard'],
+      images: productData.images?.length > 0 ? productData.images : ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'],
+      category: productData.category,
+      gender: productData.gender,
+      stock: Number(productData.stock || 10),
+      fabric: productData.fabric || 'Fine Silk',
+      sleeve: productData.sleeve,
+      fit: productData.fit || 'Regular',
+      occasion: productData.occasion || 'Festive',
+      pattern: productData.pattern || 'Solid',
+      trending: false,
+      sku: productData.sku || `SKU_${Date.now().toString().substring(8)}`,
+      deliveryTime: productData.deliveryTime || '3-5 Days',
+      careInstructions: productData.careInstructions || 'Dry Clean Only',
+      returnPolicy: productData.returnPolicy || '7 Days Returns Allowed',
+      paused: !!productData.paused,
+      stockStatus: productData.stockStatus || 'in_stock',
+      createdAt: new Date().toISOString()
+    });
+
+    res.status(201).json({
+      message: 'Product created successfully',
+      product: newProduct.get({ plain: true })
+    });
+  } catch (err) {
+    console.error('Create boutique product error:', err);
+    res.status(500).json({ message: 'Server error creating product' });
+  }
+});
+
+router.put('/products/:id', authenticateToken, requireBoutique, validateBody(productUpdateSchema), async (req: any, res) => {
+  try {
+    const product = await ProductModel.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+
+    const profile = await BoutiqueProfileModel.findByPk(req.user.id);
+    const boutiqueBrand = (profile?.boutiqueName || req.user.name || '').toLowerCase();
+    if (product.brand.toLowerCase() !== boutiqueBrand && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden. You do not own this product.' });
+    }
+
+    await product.update(req.body);
+    res.status(200).json({
+      message: 'Product updated successfully',
+      product: product.get({ plain: true })
+    });
+  } catch (err) {
+    console.error('Update boutique product error:', err);
+    res.status(500).json({ message: 'Server error updating product' });
+  }
+});
+
+router.delete('/products/:id', authenticateToken, requireBoutique, async (req: any, res) => {
+  try {
+    const product = await ProductModel.findByPk(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+
+    const profile = await BoutiqueProfileModel.findByPk(req.user.id);
+    const boutiqueBrand = (profile?.boutiqueName || req.user.name || '').toLowerCase();
+    if (product.brand.toLowerCase() !== boutiqueBrand && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden. You do not own this product.' });
+    }
+
+    await product.destroy();
+    res.status(200).json({ message: 'Product deleted successfully' });
+  } catch (err) {
+    console.error('Delete boutique product error:', err);
+    res.status(500).json({ message: 'Server error deleting product' });
   }
 });
 

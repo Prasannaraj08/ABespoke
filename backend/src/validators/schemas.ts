@@ -41,8 +41,11 @@ export const productSchema = z.object({
   deliveryTime: z.string().optional(),
   careInstructions: z.string().optional(),
   returnPolicy: z.string().optional(),
+  paused: z.boolean().optional(),
   stockStatus: z.enum(['in_stock', 'out_of_stock', 'limited_stock', 'available_soon', 'discontinued']).default('in_stock')
 });
+
+export const productUpdateSchema = productSchema.partial();
 
 // ================= ADDRESS & ORDER VALIDATIONS =================
 export const addressSchema = z.object({

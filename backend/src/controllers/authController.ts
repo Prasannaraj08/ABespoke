@@ -120,11 +120,11 @@ function buildCookies(res: Response, tokens: { accessToken: string; refreshToken
 async function getVerifiedStatus(user: any): Promise<boolean> {
   if (user.role === 'boutique') {
     const p = await BoutiqueProfileModel.findOne({ where: { userId: user.id } });
-    return p?.verified ?? false;
+    return p?.verified ?? true;
   }
   if (user.role === 'designer') {
     const p = await DesignerModel.findOne({ where: { userId: user.id } });
-    return p?.verified ?? false;
+    return p?.verified ?? true;
   }
   return true;
 }
@@ -162,19 +162,19 @@ export async function register(req: AuthenticatedRequest, res: Response) {
       await WishlistModel.create({ userId: id, productIds: [] }, { transaction: t });
 
       if (userRole === 'boutique') {
-        verified = false;
+        verified = true;
         await BoutiqueProfileModel.create({
           userId: id,
           boutiqueName: String(name).trim(),
-          about: 'Premium boutique collection.',
+          about: '',
           address: '',
           contactNumber: '',
           email: cleanEmail,
           socialLinks: { instagram: '', facebook: '', twitter: '' },
-          businessHours: '09:00 AM - 08:00 PM',
+          businessHours: '',
           experienceYears: 0,
-          specialization: 'Bridal & Party Wear',
-          verified: false,
+          specialization: '',
+          verified: true,
           deliveryOptions: 'Standard Courier',
           pricingPolicy: 'Standard Retail',
           followersCount: 0,
