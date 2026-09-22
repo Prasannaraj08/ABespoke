@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles, ShoppingBag, Store, Palette, User, ShieldCheck, X } from 'lucide-react';
+import { Search, Sparkles, ShoppingBag, Store, Palette, User, X } from 'lucide-react';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -43,7 +43,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
     { label: 'Boutique Collection Stores', path: '/catalog?category=Boutiques', icon: Store, category: 'Boutiques' },
     { label: 'Designer Lookbooks & Portfolios', path: '/catalog?category=Designers', icon: Palette, category: 'Designers' },
     { label: 'Customer Account Dashboard', path: '/dashboard', icon: User, category: 'Account' },
-    { label: 'Administration Console', path: '/admin', icon: ShieldCheck, category: 'Admin' },
   ];
 
   const filtered = quickLinks.filter(item => item.label.toLowerCase().includes(query.toLowerCase()));

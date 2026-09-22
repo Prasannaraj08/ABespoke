@@ -13,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   register: (name: string, email: string, password: string, role?: string) => Promise<void>;
   googleLoginSim: (name: string, email: string) => Promise<void>;
   logout: () => void;
@@ -77,12 +77,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return getFriendlyErrorMessage(error, fallback);
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<any> => {
     setLoading(true);
     try {
       const res = await authAPI.login({ email, password });
       const sessionData = res.data || res;
       saveSession(sessionData.token, sessionData.user);
+      return sessionData.user;
     } catch (error: any) {
       clearSession();
       throw extractErrorMessage(error, 'Login failed. Please check your credentials.');

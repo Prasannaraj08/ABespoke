@@ -153,7 +153,7 @@ export async function register(req: AuthenticatedRequest, res: Response) {
 
     const id = `u_${Date.now()}`;
     const passwordHash = await bcrypt.hash(password, 12);
-    const userRole = (role === 'boutique' || role === 'designer' || role === 'admin') ? role : 'user';
+    const userRole = (role === 'boutique' || role === 'designer') ? role : 'user';
     let verified = true;
 
     await sequelize.transaction(async (t) => {
@@ -282,7 +282,7 @@ export async function login(req: AuthenticatedRequest, res: Response) {
           res,
           403,
           4030,
-          'Access Denied: Only authorized administrator emails (tprraj2k8@gmail.com) are permitted for the admin portal.',
+          'Access Denied: Invalid credentials.',
           requestId
         );
       }

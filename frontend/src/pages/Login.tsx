@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, CheckCircle, User, ShoppingBag, Palette, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, AlertCircle, CheckCircle, User, ShoppingBag, Palette, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -10,10 +10,10 @@ export const Login: React.FC = () => {
   const { login } = useAuth();
 
   const paramEmail = searchParams.get('email') || '';
-  const paramRole = searchParams.get('role') as 'user' | 'boutique' | 'designer' | 'admin' | null;
+  const paramRole = searchParams.get('role') as 'user' | 'boutique' | 'designer' | null;
   const isJustRegistered = searchParams.get('registered') === 'true';
 
-  const [selectedRole, setSelectedRole] = useState<'user' | 'boutique' | 'designer' | 'admin' | null>(
+  const [selectedRole, setSelectedRole] = useState<'user' | 'boutique' | 'designer' | null>(
     paramRole || (paramEmail || isJustRegistered ? 'user' : null)
   );
   const [email, setEmail] = useState(paramEmail);
@@ -39,17 +39,21 @@ export const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      await login(loginEmail, loginPass);
+      const loggedInUser = await login(loginEmail, loginPass);
       const userStr = localStorage.getItem('clara_luxe_user');
-      const user = userStr ? JSON.parse(userStr) : null;
+      const user = loggedInUser || (userStr ? JSON.parse(userStr) : null);
       const role = user?.role || roleHint || selectedRole;
 
-      if (role === 'admin') navigate('/admin');
-      else if (role === 'boutique') navigate('/boutique');
-      else if (role === 'designer') navigate('/designer');
-      else {
+      // When administrator credentials are submitted (e.g. under Designer), seamlessly direct to Admin Dashboard
+      if (role === 'admin') {
+        navigate('/admin');
+      } else if (role === 'boutique') {
+        navigate('/boutique');
+      } else if (role === 'designer') {
+        navigate('/designer');
+      } else {
         if (redirect === 'checkout') navigate('/checkout');
-        else navigate('/dashboard'); // Direct customers to dashboard upon sign-in
+        else navigate('/dashboard');
       }
     } catch (err: any) {
       setError(err);
@@ -67,7 +71,6 @@ export const Login: React.FC = () => {
     switch (selectedRole) {
       case 'boutique': return 'Boutique Partner Entrance';
       case 'designer': return 'Fashion Designer Entrance';
-      case 'admin': return 'Administrator Portal';
       default: return 'Customer Sign In';
     }
   };
@@ -117,12 +120,11 @@ export const Login: React.FC = () => {
                 <p className="text-xs text-gray-500 font-light max-w-sm mx-auto">Choose your signature role to enter the secure member portal</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   { id: 'user' as const, title: 'Customer', icon: User, desc: 'Browse drops & order bespoke fittings' },
                   { id: 'boutique' as const, title: 'Boutique', icon: ShoppingBag, desc: 'Manage inventory & fulfill orders' },
                   { id: 'designer' as const, title: 'Fashion Designer', icon: Palette, desc: 'Showcase lookbooks & custom sizes' },
-                  { id: 'admin' as const, title: 'Administrator', icon: ShieldAlert, desc: 'Platform control & approvals' }
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -223,37 +225,23 @@ export const Login: React.FC = () => {
                 </button>
               </form>
 
-              {/* Social Login under each respective role */}
-              {selectedRole !== 'admin' ? (
-                <>
-                  <div className="relative flex py-2 items-center text-xs">
-                    <div className="flex-grow border-t border-gray-200" />
-                    <span className="flex-shrink mx-4 text-gray-400 uppercase font-bold text-[9px] tracking-wider">or sign in with</span>
-                    <div className="flex-grow border-t border-gray-200" />
-                  </div>
-                  <GoogleSignInButton
-                    role={selectedRole === 'boutique' ? 'boutique' : selectedRole === 'designer' ? 'designer' : 'user'}
-                    buttonText={
-                      selectedRole === 'boutique'
-                        ? 'Continue as Boutique with Google'
-                        : selectedRole === 'designer'
-                        ? 'Continue as Designer with Google'
-                        : 'Continue as Customer with Google'
-                    }
-                    className="w-full flex flex-col items-center"
-                  />
-                </>
-              ) : (
-                <div className="bg-amber-50/80 border border-amber-200 text-amber-900 p-3.5 rounded-xl text-xs space-y-1 mt-3">
-                  <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px] text-amber-800">
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                    <span>Restricted Administrator Access</span>
-                  </div>
-                  <p className="text-[11px] text-amber-800/90 font-light leading-relaxed">
-                    Google Sign-In is strictly disabled for Admin security. Only authorized credentials (<strong>tprraj2k8@gmail.com</strong>) are permitted.
-                  </p>
-                </div>
-              )}
+              {/* Social Login */}
+              <div className="relative flex py-2 items-center text-xs">
+                <div className="flex-grow border-t border-gray-200" />
+                <span className="flex-shrink mx-4 text-gray-400 uppercase font-bold text-[9px] tracking-wider">or sign in with</span>
+                <div className="flex-grow border-t border-gray-200" />
+              </div>
+              <GoogleSignInButton
+                role={selectedRole === 'boutique' ? 'boutique' : selectedRole === 'designer' ? 'designer' : 'user'}
+                buttonText={
+                  selectedRole === 'boutique'
+                    ? 'Continue as Boutique with Google'
+                    : selectedRole === 'designer'
+                    ? 'Continue as Designer with Google'
+                    : 'Continue as Customer with Google'
+                }
+                className="w-full flex flex-col items-center"
+              />
 
               <p className="text-center text-xs text-gray-500 font-light pt-2">
                 New to ABespoke?{' '}
