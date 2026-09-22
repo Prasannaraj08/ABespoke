@@ -282,7 +282,7 @@ export async function login(req: AuthenticatedRequest, res: Response) {
           res,
           403,
           4030,
-          'Access Denied: Only authorized administrator emails (tprraj2k8@gmail.com or demo credentials) are permitted for the admin portal.',
+          'Access Denied: Only authorized administrator emails (tprraj2k8@gmail.com) are permitted for the admin portal.',
           requestId
         );
       }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Mail, Lock, AlertCircle, CheckCircle, User, ShoppingBag, Palette, ArrowLeft, KeyRound, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, AlertCircle, CheckCircle, User, ShoppingBag, Palette, ArrowLeft, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -63,30 +63,6 @@ export const Login: React.FC = () => {
     await executeLogin(email, password);
   };
 
-  const handleInstantDemoLogin = (demoRole: 'user' | 'boutique' | 'designer' | 'admin') => {
-    let demoEmail = '';
-    let demoPass = '';
-
-    if (demoRole === 'designer') {
-      demoEmail = 'designer@example.com';
-      demoPass = 'password';
-    } else if (demoRole === 'boutique') {
-      demoEmail = 'boutique@example.com';
-      demoPass = 'BT@123';
-    } else if (demoRole === 'admin') {
-      demoEmail = 'abespokeadmin@example.com';
-      demoPass = 'CLARA@17';
-    } else {
-      demoEmail = 'customer@example.com';
-      demoPass = 'password123';
-    }
-
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setSelectedRole(demoRole);
-    executeLogin(demoEmail, demoPass, demoRole);
-  };
-
   const getRoleTitle = () => {
     switch (selectedRole) {
       case 'boutique': return 'Boutique Partner Entrance';
@@ -132,58 +108,21 @@ export const Login: React.FC = () => {
         {/* Right Side: Interactive Login Portal */}
         <div className="lg:col-span-7 p-6 sm:p-10 md:p-12 flex flex-col justify-center space-y-6">
           
-          {/* Quick Demo Access Header Banner */}
-          <div className="bg-[#FAF9F5] border border-[#C79A4A]/25 rounded-2xl p-4 space-y-2">
-            <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-[#C79A4A]">
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Instant 1-Click Demo Login</span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button
-                type="button"
-                onClick={() => handleInstantDemoLogin('user')}
-                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
-              >
-                👤 Customer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleInstantDemoLogin('designer')}
-                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
-              >
-                👗 Designer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleInstantDemoLogin('boutique')}
-                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
-              >
-                🛍️ Boutique
-              </button>
-              <button
-                type="button"
-                onClick={() => handleInstantDemoLogin('admin')}
-                className="bg-white hover:bg-[#C79A4A] hover:text-white border border-gray-200 text-gray-800 text-[10px] font-bold py-2 px-2.5 rounded-xl transition-all shadow-xs text-center cursor-pointer"
-              >
-                👑 Admin
-              </button>
-            </div>
-          </div>
-
           {/* Portal Selector Cards */}
           {!selectedRole ? (
             <div className="space-y-6">
               <div className="text-center space-y-2">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-[#C79A4A]">Secure Member Portal</span>
                 <h2 className="font-serif text-2xl md:text-3xl font-bold text-gray-900">Select Account Portal</h2>
-                <p className="text-xs text-gray-500 font-light max-w-sm mx-auto">Choose your signature role or use 1-Click Demo Login above</p>
+                <p className="text-xs text-gray-500 font-light max-w-sm mx-auto">Choose your signature role to enter the secure member portal</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { id: 'user' as const, title: 'Customer', icon: User, desc: 'Browse drops & order fittings' },
-                  { id: 'boutique' as const, title: 'Boutique', icon: ShoppingBag, desc: 'Manage inventory & fulfillment' },
-                  { id: 'designer' as const, title: 'Designer / Admin', icon: Palette, desc: 'Showcase lookbooks & custom sizes' }
+                  { id: 'user' as const, title: 'Customer', icon: User, desc: 'Browse drops & order bespoke fittings' },
+                  { id: 'boutique' as const, title: 'Boutique', icon: ShoppingBag, desc: 'Manage inventory & fulfill orders' },
+                  { id: 'designer' as const, title: 'Fashion Designer', icon: Palette, desc: 'Showcase lookbooks & custom sizes' },
+                  { id: 'admin' as const, title: 'Administrator', icon: ShieldAlert, desc: 'Platform control & approvals' }
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
@@ -311,7 +250,7 @@ export const Login: React.FC = () => {
                     <span>Restricted Administrator Access</span>
                   </div>
                   <p className="text-[11px] text-amber-800/90 font-light leading-relaxed">
-                    Google Sign-In is strictly disabled for Admin security. Only authorized credentials (<strong>tprraj2k8@gmail.com</strong> or demo credentials) are permitted.
+                    Google Sign-In is strictly disabled for Admin security. Only authorized credentials (<strong>tprraj2k8@gmail.com</strong>) are permitted.
                   </p>
                 </div>
               )}
