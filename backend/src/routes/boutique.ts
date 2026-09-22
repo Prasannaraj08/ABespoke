@@ -286,14 +286,14 @@ router.post('/tailors', authenticateToken, requireBoutique, validateBody(tailorS
       boutiqueId: req.user.id,
       name: req.body.name,
       photoUrl: req.body.photoUrl || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
-      experience: req.body.experience,
-      specialization: req.body.specialization,
-      certifications: req.body.certifications || [],
-      workingHours: req.body.workingHours,
-      languages: req.body.languages || [],
+      experience: req.body.experience || 'Experienced Master Tailor',
+      specialization: req.body.specialization || 'Custom Tailoring',
+      certifications: Array.isArray(req.body.certifications) ? req.body.certifications : [],
+      workingHours: req.body.workingHours || '10:00 AM - 07:00 PM',
+      languages: Array.isArray(req.body.languages) ? req.body.languages : ['English'],
       bio: req.body.bio || '',
       rating: 5.0,
-      projectsCount: 0
+      projectsCount: Number(req.body.projectsCount) || 0
     });
     res.status(201).json(newTailor.get({ plain: true }));
   } catch (err) {
@@ -335,13 +335,15 @@ router.post('/portfolio', authenticateToken, requireBoutique, validateBody(portf
     const newItem = await PortfolioModel.create({
       id: `port_${Date.now()}`,
       boutiqueId: req.user.id,
-      images: req.body.images,
+      images: Array.isArray(req.body.images) && req.body.images.length > 0 
+        ? req.body.images 
+        : ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600'],
       designName: req.body.designName,
       category: req.body.category,
       description: req.body.description || '',
-      fabric: req.body.fabric,
-      stitchingType: req.body.stitchingType,
-      completionTime: req.body.completionTime,
+      fabric: req.body.fabric || 'Fine Fabric',
+      stitchingType: req.body.stitchingType || 'Bespoke Custom Stitch',
+      completionTime: req.body.completionTime || '3-5 Days',
       customerReview: ''
     });
     res.status(201).json(newItem.get({ plain: true }));
@@ -385,13 +387,13 @@ router.post('/hiring', authenticateToken, requireBoutique, validateBody(tailorRe
       id: `hiring_${Date.now()}`,
       boutiqueId: req.user.id,
       title: req.body.title,
-      skills: req.body.skills || [],
-      experience: req.body.experience,
-      employmentType: req.body.employmentType,
-      salaryRange: req.body.salaryRange,
-      location: req.body.location,
-      vacancies: req.body.vacancies,
-      closingDate: req.body.closingDate
+      skills: Array.isArray(req.body.skills) && req.body.skills.length > 0 ? req.body.skills : ['Master Tailoring'],
+      experience: req.body.experience || '2+ Years',
+      employmentType: req.body.employmentType || 'Full-time',
+      salaryRange: req.body.salaryRange || 'Competitive',
+      location: req.body.location || 'Store Boutique',
+      vacancies: Number(req.body.vacancies) || 1,
+      closingDate: req.body.closingDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
     });
     res.status(201).json(newReq.get({ plain: true }));
   } catch (err) {

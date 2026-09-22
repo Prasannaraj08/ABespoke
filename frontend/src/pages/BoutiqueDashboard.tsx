@@ -152,11 +152,16 @@ export const BoutiqueDashboard: React.FC = () => {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const updated = await boutiqueAPI.updateProfile(profile);
-      setProfile(updated);
+      const sanitized = {
+        ...profile,
+        experienceYears: Number(profile.experienceYears) || 0,
+        socialLinks: profile.socialLinks || { instagram: '', facebook: '', twitter: '' }
+      };
+      const updated = await boutiqueAPI.updateProfile(sanitized);
+      setProfile((prev: any) => ({ ...prev, ...(updated?.profile || updated?.data || updated) }));
       alert('Boutique Seller Profile details updated successfully.');
-    } catch (err) {
-      alert('Failed to update boutique details.');
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to update boutique details.');
     }
   };
 
@@ -166,16 +171,31 @@ export const BoutiqueDashboard: React.FC = () => {
     try {
       const payloadData = {
         ...tailorPayload,
-        certifications: tailorPayload.certifications.split(',').map(s => s.trim()),
-        languages: tailorPayload.languages.split(',').map(s => s.trim()),
-        projectsCount: Number(tailorPayload.projectsCount)
+        certifications: tailorPayload.certifications ? tailorPayload.certifications.split(',').map(s => s.trim()).filter(Boolean) : [],
+        languages: tailorPayload.languages ? tailorPayload.languages.split(',').map(s => s.trim()).filter(Boolean) : ['English'],
+        projectsCount: Number(tailorPayload.projectsCount) || 0,
+        photoUrl: tailorPayload.photoUrl || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
+        experience: tailorPayload.experience || 'Master Craftsman',
+        workingHours: tailorPayload.workingHours || '10:00 AM - 07:00 PM',
+        specialization: tailorPayload.specialization || 'Bespoke Stitching'
       };
       await boutiqueAPI.addTailor(payloadData);
       setShowTailorForm(false);
+      setTailorPayload({
+        name: '',
+        photoUrl: '',
+        experience: '',
+        specialization: '',
+        certifications: '',
+        workingHours: '',
+        languages: '',
+        bio: '',
+        projectsCount: ''
+      });
       loadData();
       alert('Tailor profile added successfully.');
-    } catch (err) {
-      alert('Failed to add tailor.');
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to add tailor.');
     }
   };
 
@@ -192,14 +212,27 @@ export const BoutiqueDashboard: React.FC = () => {
     try {
       const payloadData = {
         ...portfolioPayload,
-        images: portfolioPayload.images
+        fabric: portfolioPayload.fabric || 'Fine Fabric',
+        stitchingType: portfolioPayload.stitchingType || 'Bespoke Custom Stitch',
+        completionTime: portfolioPayload.completionTime || '3-5 Days',
+        images: portfolioPayload.images.length > 0 ? portfolioPayload.images : ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600']
       };
       await boutiqueAPI.addPortfolio(payloadData);
       setShowPortfolioForm(false);
+      setPortfolioPayload({
+        designName: '',
+        category: 'Lehenga',
+        description: '',
+        fabric: '',
+        stitchingType: '',
+        completionTime: '',
+        images: [],
+        customerReview: ''
+      });
       loadData();
       alert('Portfolio lookbook design added.');
-    } catch (err) {
-      alert('Failed to add portfolio lookbook.');
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to add portfolio lookbook.');
     }
   };
 
@@ -216,14 +249,28 @@ export const BoutiqueDashboard: React.FC = () => {
     try {
       const payloadData = {
         ...hiringPayload,
-        skills: hiringPayload.skills.split(',').map(s => s.trim())
+        skills: hiringPayload.skills ? hiringPayload.skills.split(',').map(s => s.trim()).filter(Boolean) : ['Tailoring', 'Hand Stitching'],
+        vacancies: Number(hiringPayload.vacancies) || 1,
+        closingDate: hiringPayload.closingDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        salaryRange: hiringPayload.salaryRange || 'Competitive',
+        location: hiringPayload.location || 'Store Location'
       };
       await boutiqueAPI.addHiring(payloadData);
       setShowHiringForm(false);
+      setHiringPayload({
+        title: '',
+        skills: '',
+        experience: '',
+        employmentType: 'Full-time',
+        salaryRange: '',
+        location: '',
+        vacancies: '1',
+        closingDate: ''
+      });
       loadData();
       alert('Hiring requirement posted successfully.');
-    } catch (err) {
-      alert('Failed to post vacancy.');
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to post vacancy.');
     }
   };
 

@@ -77,55 +77,57 @@ export const orderSchema = z.object({
 
 // ================= BOUTIQUE SELLER VALIDATIONS =================
 export const boutiqueProfileSchema = z.object({
-  boutiqueName: z.string().min(2).max(150),
-  about: z.string().min(10).max(2000),
-  address: z.string().min(5).max(300),
-  contactNumber: z.string().regex(/^\+?[0-9\s-]{10,15}$/, { message: 'Provide a valid contact number' }),
-  email: z.string().email(),
+  boutiqueName: z.string().min(1).max(150),
+  about: z.string().max(2000).optional().default(''),
+  address: z.string().max(300).optional().default(''),
+  contactNumber: z.string().max(30).optional().default(''),
+  email: z.string().optional().default(''),
   socialLinks: z.object({
     instagram: z.string().optional(),
     facebook: z.string().optional(),
     twitter: z.string().optional()
-  }).default({}),
-  businessHours: z.string().min(2).max(100),
-  experienceYears: z.number().int().nonnegative().default(0),
-  specialization: z.string().min(2).max(150),
-  deliveryOptions: z.string().min(2).max(200),
-  pricingPolicy: z.string().min(2).max(200),
-  logoUrl: z.string().url().optional(),
-  bannerUrl: z.string().url().optional()
+  }).optional().default({}),
+  businessHours: z.string().max(100).optional().default(''),
+  experienceYears: z.union([z.number(), z.string()]).optional().default(0),
+  specialization: z.string().max(150).optional().default(''),
+  deliveryOptions: z.string().max(200).optional().default(''),
+  pricingPolicy: z.string().max(200).optional().default(''),
+  logoUrl: z.string().optional().default(''),
+  bannerUrl: z.string().optional().default(''),
+  verified: z.boolean().optional()
 });
 
 export const tailorSchema = z.object({
-  name: z.string().min(2).max(100),
-  photoUrl: z.string().url().optional(),
-  experience: z.string().min(1).max(50),
-  specialization: z.string().min(2).max(100),
+  name: z.string().min(1).max(100),
+  photoUrl: z.string().optional().default(''),
+  experience: z.string().max(50).optional().default(''),
+  specialization: z.string().max(100).optional().default(''),
   certifications: z.array(z.string()).default([]),
-  workingHours: z.string().min(2).max(100),
+  workingHours: z.string().max(100).optional().default(''),
   languages: z.array(z.string()).default([]),
-  bio: z.string().max(1000).default('')
+  bio: z.string().max(1000).optional().default(''),
+  projectsCount: z.union([z.number(), z.string()]).optional().default(0)
 });
 
 export const portfolioItemSchema = z.object({
-  designName: z.string().min(2).max(150),
-  category: z.string().min(2).max(100),
-  description: z.string().max(1000).default(''),
-  fabric: z.string().min(2).max(100),
-  stitchingType: z.string().min(2).max(100),
-  completionTime: z.string().min(1).max(100),
-  images: z.array(z.string().url()).min(1, { message: 'Provide at least one portfolio image URL' })
+  designName: z.string().min(1).max(150),
+  category: z.string().min(1).max(100),
+  description: z.string().max(1000).optional().default(''),
+  fabric: z.string().max(100).optional().default(''),
+  stitchingType: z.string().max(100).optional().default(''),
+  completionTime: z.string().max(100).optional().default(''),
+  images: z.array(z.string()).min(1, { message: 'Provide at least one portfolio image' })
 });
 
 export const tailorRequirementSchema = z.object({
-  title: z.string().min(2).max(150),
-  skills: z.array(z.string()).min(1),
-  experience: z.string().min(1).max(50),
-  employmentType: z.string().min(2).max(100),
-  salaryRange: z.string().min(2).max(100),
-  location: z.string().min(2).max(100),
-  vacancies: z.number().int().positive().default(1),
-  closingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Provide closing date in YYYY-MM-DD format' })
+  title: z.string().min(1).max(150),
+  skills: z.array(z.string()).default([]),
+  experience: z.string().max(50).optional().default(''),
+  employmentType: z.string().max(100).optional().default('Full-time'),
+  salaryRange: z.string().max(100).optional().default(''),
+  location: z.string().max(100).optional().default(''),
+  vacancies: z.union([z.number(), z.string()]).default(1),
+  closingDate: z.string().optional().default('')
 });
 
 // ================= DESIGNER VALIDATIONS =================
