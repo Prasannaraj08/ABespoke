@@ -222,8 +222,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L', 'XL'],
         colors: ['Wine Red', 'Deep Teal'],
         images: [
-          'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&auto=format&fit=crop&q=80',
-          'https://images.unsplash.com/photo-1610030469668-93535c17b6b3?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Lehengas',
         gender: 'women',
@@ -271,7 +270,7 @@ export async function seedDatabase() {
         sizes: ['M', 'L', 'XL'],
         colors: ['Vanilla Cream', 'Mustard Gold'],
         images: [
-          'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Lehengas',
         gender: 'women',
@@ -295,7 +294,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L'],
         colors: ['Lavender Mist', 'Peach Sorbet'],
         images: [
-          'https://images.unsplash.com/photo-1610030469668-93535c17b6b3?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Lehengas',
         gender: 'women',
@@ -346,7 +345,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L'],
         colors: ['Blush Pink', 'Slate Charcoal'],
         images: [
-          'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Hoodies',
         gender: 'women',
@@ -371,7 +370,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L', 'XL'],
         colors: ['Sage Green', 'Warm Sand'],
         images: [
-          'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Hoodies',
         gender: 'women',
@@ -396,7 +395,7 @@ export async function seedDatabase() {
         sizes: ['XS', 'S', 'M', 'L'],
         colors: ['Electric Purple', 'Stealth Black'],
         images: [
-          'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Hoodies',
         gender: 'women',
@@ -423,7 +422,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L'],
         colors: ['Magenta & Mustard', 'Parrot Green & Coral'],
         images: [
-          'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1583391733975-00c73e04cfb9?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Half Sarees',
         gender: 'women',
@@ -447,7 +446,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L'],
         colors: ['Lilac Lavendar', 'Mint Turquoise'],
         images: [
-          'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1610030469668-93535c17b6b3?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Half Sarees',
         gender: 'women',
@@ -471,7 +470,7 @@ export async function seedDatabase() {
         sizes: ['M', 'L', 'XL'],
         colors: ['Maroon Gold', 'Peacock Blue'],
         images: [
-          'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1610030470298-40b355e717dc?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Half Sarees',
         gender: 'women',
@@ -652,7 +651,7 @@ export async function seedDatabase() {
         sizes: ['M', 'L', 'XL'],
         colors: ['Navy/White', 'Navy/Red'],
         images: [
-          'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1625910513413-7d8487779ef4?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Shirts',
         gender: 'men',
@@ -702,7 +701,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L', 'XL'],
         colors: ['Lavender', 'Pure White'],
         images: [
-          'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Shirts',
         gender: 'men',
@@ -753,7 +752,7 @@ export async function seedDatabase() {
         sizes: ['30', '32', '34', '36'],
         colors: ['Charcoal Gray', 'Jet Black'],
         images: [
-          'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Pants',
         gender: 'men',
@@ -777,7 +776,7 @@ export async function seedDatabase() {
         sizes: ['32', '34', '36', '38'],
         colors: ['Dark Tan', 'Navy Blue'],
         images: [
-          'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Pants',
         gender: 'men',
@@ -827,8 +826,7 @@ export async function seedDatabase() {
         sizes: ['S', 'M', 'L', 'XL'],
         colors: ['Olive Green', 'Black', 'Heather Gray'],
         images: [
-          'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&auto=format&fit=crop&q=80',
-          'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Hoodies',
         gender: 'men',
@@ -853,7 +851,7 @@ export async function seedDatabase() {
         sizes: ['M', 'L', 'XL'],
         colors: ['Camel Brown', 'Navy Gray'],
         images: [
-          'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Hoodies',
         gender: 'men',
@@ -903,7 +901,7 @@ export async function seedDatabase() {
         sizes: ['M', 'L', 'XL'],
         colors: ['Off-Black', 'Forest Green'],
         images: [
-          'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Hoodies',
         gender: 'men',
@@ -930,8 +928,7 @@ export async function seedDatabase() {
         sizes: ['38', '40', '42', '44'],
         colors: ['Navy Tweed', 'Charcoal Herringbone'],
         images: [
-          'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&auto=format&fit=crop&q=80',
-          'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Blazers',
         gender: 'men',
@@ -981,7 +978,7 @@ export async function seedDatabase() {
         sizes: ['40', '42', '44'],
         colors: ['Mid Gray Flannel', 'Midnight Navy'],
         images: [
-          'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Blazers',
         gender: 'men',
@@ -1006,7 +1003,7 @@ export async function seedDatabase() {
         sizes: ['38', '40', '42', '44'],
         colors: ['Navy Blue', 'Forest Green'],
         images: [
-          'https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1548883354-7622d03aca27?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Blazers',
         gender: 'men',
@@ -1057,7 +1054,7 @@ export async function seedDatabase() {
         sizes: ['30', '32', '34'],
         colors: ['Jet Black', 'Washed Gray'],
         images: [
-          'https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Jeans',
         gender: 'men',
@@ -1081,7 +1078,7 @@ export async function seedDatabase() {
         sizes: ['32', '34', '36'],
         colors: ['Light Indigo Wash'],
         images: [
-          'https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1582552938357-32b906df40cb?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Jeans',
         gender: 'men',
@@ -1105,7 +1102,7 @@ export async function seedDatabase() {
         sizes: ['30', '32', '34', '36'],
         colors: ['Raw Dark Navy'],
         images: [
-          'https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1560243563-062bfc001d68?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Jeans',
         gender: 'men',

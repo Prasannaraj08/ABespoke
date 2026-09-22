@@ -65,7 +65,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
           <img
             src={product.images?.[0] || 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600'}
             alt={product.title}
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-cover object-center"
           />
           <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-[#C79A4A] border border-[#C79A4A]/30">
             {product.brand || 'Atelier Exclusive'}

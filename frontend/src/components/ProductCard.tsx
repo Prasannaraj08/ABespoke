@@ -59,7 +59,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src={product.images[0] || 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500'}
             alt={product.title}
             loading="lazy"
-            className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
           />
           
           {/* Discount Badge */}

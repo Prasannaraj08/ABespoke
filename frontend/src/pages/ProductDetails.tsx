@@ -273,7 +273,7 @@ export const ProductDetails: React.FC = () => {
                   selectedImage === img ? 'border-luxury-gold' : 'border-transparent'
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover object-top" />
+                <img src={img} alt="" className="w-full h-full object-cover object-center" />
               </button>
             ))}
           </div>
@@ -287,7 +287,7 @@ export const ProductDetails: React.FC = () => {
             <img
               src={selectedImage}
               alt={product.title}
-              className="w-full h-full object-cover object-top"
+              className="w-full h-full object-cover object-center"
             />
             {/* Zoom Overlay panel */}
             <div
