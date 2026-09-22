@@ -16,6 +16,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState('');
+  const [sizeError, setSizeError] = useState(false);
 
   if (!product) return null;
 
@@ -23,11 +24,15 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
   const colors = Array.isArray(product.colors) ? product.colors : ['Classic'];
 
   const handleAddToCart = async () => {
+    if (sizes.length > 0 && !selectedSize) {
+      setSizeError(true);
+      return;
+    }
     setAdding(true);
     try {
       await addToCart(
         product.id,
-        selectedSize || sizes[0],
+        selectedSize || 'Free Size',
         selectedColor || colors[0],
         1,
         product
@@ -108,16 +113,26 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
           {/* Options */}
           <div className="space-y-4">
             {/* Sizes */}
-            <div className="space-y-1.5">
-              <label className="text-[10px] uppercase font-bold tracking-wider text-gray-500">Available Sizes</label>
+            <div className={`space-y-1.5 p-2 rounded-xl transition-all ${sizeError ? 'border border-red-300 bg-red-50/70' : ''}`}>
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] uppercase font-bold tracking-wider text-gray-500">
+                  Available Sizes {selectedSize ? <span className="text-[#C79A4A] font-bold">({selectedSize})</span> : <span className="text-red-500 font-semibold">*(Required)</span>}
+                </label>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {sizes.map((s: string) => (
                   <button
                     key={s}
-                    onClick={() => setSelectedSize(s)}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSize(s);
+                      setSizeError(false);
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                      (selectedSize || sizes[0]) === s
-                        ? 'bg-gray-900 text-white border-gray-900'
+                      selectedSize === s
+                        ? 'bg-gray-900 text-white border-gray-900 shadow-xs'
+                        : sizeError
+                        ? 'bg-white text-gray-700 border-red-300 hover:border-red-500'
                         : 'bg-white text-gray-700 border-gray-200 hover:border-[#C79A4A]'
                     }`}
                   >
@@ -125,6 +140,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose
                   </button>
                 ))}
               </div>
+              {sizeError && (
+                <p className="text-red-600 text-[11px] font-semibold pt-0.5">
+                  Please select a size to add to bag.
+                </p>
+              )}
             </div>
 
             {/* Colors */}

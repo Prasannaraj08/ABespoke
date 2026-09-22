@@ -25,6 +25,8 @@ export const ProductDetails: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [sizeError, setSizeError] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState('');
 
   // Pincode check
   const [pincode, setPincode] = useState('');
@@ -63,8 +65,9 @@ export const ProductDetails: React.FC = () => {
       setReviews(data.reviews);
       setSelectedImage(data.product.images[0]);
       
-      // Pre-select first size and color
-      if (data.product.sizes?.length) setSelectedSize(data.product.sizes[0]);
+      // Leave size unselected so customer explicitly selects their size before purchase
+      setSelectedSize('');
+      setSizeError(false);
       if (data.product.colors?.length) setSelectedColor(data.product.colors[0]);
 
       // Load recommendations
@@ -128,10 +131,16 @@ export const ProductDetails: React.FC = () => {
 
   const handleAddToCartClick = async () => {
     if (!product) return;
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      setSizeError(true);
+      const el = document.getElementById('size-selector-block');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     try {
-      await addToCart(product.id, selectedSize, selectedColor, quantity, product);
-      // Optional: trigger cart drawer open or prompt
-      alert('Product added to your bag!');
+      await addToCart(product.id, selectedSize || 'Free Size', selectedColor || 'Standard', quantity, product);
+      setActionFeedback(`Added ${quantity} item(s) (Size: ${selectedSize || 'Free Size'}) to your bag!`);
+      setTimeout(() => setActionFeedback(''), 3500);
     } catch (err) {
       console.error(err);
     }
@@ -139,8 +148,14 @@ export const ProductDetails: React.FC = () => {
 
   const handleBuyNowClick = async () => {
     if (!product) return;
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      setSizeError(true);
+      const el = document.getElementById('size-selector-block');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     try {
-      await addToCart(product.id, selectedSize, selectedColor, quantity, product);
+      await addToCart(product.id, selectedSize || 'Free Size', selectedColor || 'Standard', quantity, product);
       navigate('/checkout');
     } catch (err) {
       console.error(err);
@@ -149,9 +164,15 @@ export const ProductDetails: React.FC = () => {
 
   const handleBuyBundleClick = async () => {
     if (!product || !bundleProducts.length) return;
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+      setSizeError(true);
+      const el = document.getElementById('size-selector-block');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     try {
       // Add main product
-      await addToCart(product.id, selectedSize, selectedColor, 1, product);
+      await addToCart(product.id, selectedSize || 'Free Size', selectedColor || 'Standard', 1, product);
       
       // Add bundle accessories with default sizes/colors
       for (const bp of bundleProducts) {
@@ -159,7 +180,8 @@ export const ProductDetails: React.FC = () => {
         const color = bp.colors?.length ? bp.colors[0] : 'Default';
         await addToCart(bp.id, size, color, 1, bp);
       }
-      alert('Bundle added to bag with special pairing discount!');
+      setActionFeedback('Bundle added to bag with special pairing discount!');
+      setTimeout(() => setActionFeedback(''), 3500);
     } catch (err) {
       console.error(err);
     }
@@ -341,36 +363,80 @@ export const ProductDetails: React.FC = () => {
           </div>
 
           {/* Size Selector */}
-          <div className="space-y-2.5">
-            <h4 className="text-[10px] uppercase font-bold tracking-wider text-luxury-dark flex justify-between">
-              <span>Select Size: <span className="text-luxury-gold font-bold">{selectedSize}</span></span>
-              <a href="#" className="text-luxury-gold hover:underline text-[9px] lowercase tracking-wide font-normal">size guide</a>
-            </h4>
-            <div className="flex gap-2">
-              {product.sizes.map((sz: string) => (
-                <button
-                  key={sz}
-                  onClick={() => setSelectedSize(sz)}
-                  className={`w-9 h-9 border rounded-lg text-xs font-semibold flex items-center justify-center transition-all ${
-                    selectedSize === sz
-                      ? 'border-luxury-dark bg-luxury-dark text-white'
-                      : 'border-neutral-200 hover:border-luxury-gold text-luxury-dark bg-white'
-                  }`}
-                >
-                  {sz}
-                </button>
-              ))}
+          <div
+            id="size-selector-block"
+            className={`space-y-2.5 p-3.5 rounded-xl transition-all ${
+              sizeError
+                ? 'bg-red-50/70 border-2 border-red-300 ring-2 ring-red-100 shadow-xs'
+                : 'border border-transparent'
+            }`}
+          >
+            <div className="flex justify-between items-center">
+              <h4 className="text-[10px] uppercase font-bold tracking-wider text-luxury-dark flex items-center gap-1.5">
+                <span>Select Size:</span>
+                {selectedSize ? (
+                  <span className="text-luxury-gold font-bold bg-[#FAF9F5] border border-amber-200/80 px-2 py-0.5 rounded text-xs">
+                    {selectedSize}
+                  </span>
+                ) : (
+                  <span className="text-red-500 font-semibold text-[10px] bg-red-100/70 px-1.5 py-0.5 rounded">
+                    *(Selection Required)
+                  </span>
+                )}
+              </h4>
+              <a href="#size-guide" className="text-luxury-gold hover:underline text-[9px] lowercase tracking-wide font-normal">
+                size guide
+              </a>
             </div>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              {product.sizes.map((sz: string) => {
+                const isSelected = selectedSize === sz;
+                return (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSize(sz);
+                      setSizeError(false);
+                    }}
+                    className={`min-w-10 h-10 px-2.5 border rounded-lg text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-luxury-dark bg-luxury-dark text-white shadow-sm ring-2 ring-luxury-gold/50'
+                        : sizeError
+                        ? 'border-red-300 bg-white hover:border-red-500 text-luxury-dark'
+                        : 'border-neutral-200 hover:border-luxury-gold text-luxury-dark bg-white'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                );
+              })}
+            </div>
+
+            {sizeError && (
+              <p className="text-red-600 text-xs font-semibold flex items-center gap-1.5 pt-1 animate-pulse">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                Please select a size to add to bag or proceed to buy
+              </p>
+            )}
           </div>
 
           {/* Quantity and Primary Actions */}
           <div className="space-y-3.5 pt-2">
+            {actionFeedback && (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-2 font-medium animate-fadeIn">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{actionFeedback}</span>
+              </div>
+            )}
+
             <div className="flex gap-4">
               {/* Quantity dropdown */}
               <select
                 value={quantity}
                 onChange={(e) => setQuantity(Number(e.target.value))}
-                className="bg-white border border-neutral-200 rounded-lg text-xs font-semibold py-3 px-3 focus:outline-none focus:border-luxury-gold"
+                className="bg-white border border-neutral-200 rounded-lg text-xs font-semibold py-3 px-3 focus:outline-none focus:border-luxury-gold cursor-pointer"
               >
                 {[1, 2, 3, 4, 5].map(q => (
                   <option key={q} value={q}>Qty: {q}</option>
@@ -381,7 +447,7 @@ export const ProductDetails: React.FC = () => {
               <button
                 onClick={handleAddToCartClick}
                 disabled={product.stock === 0}
-                className="flex-1 bg-luxury-dark hover:bg-neutral-800 text-white font-semibold text-[10px] uppercase tracking-widest py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:bg-zinc-200"
+                className="flex-1 bg-luxury-dark hover:bg-neutral-800 text-white font-semibold text-[10px] uppercase tracking-widest py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:bg-zinc-200 cursor-pointer shadow-xs"
               >
                 <ShoppingBag className="w-3.5 h-3.5" /> {product.stock === 0 ? 'Out of Stock' : 'Add to Bag'}
               </button>
@@ -389,7 +455,7 @@ export const ProductDetails: React.FC = () => {
               {/* Wishlist Toggle */}
               <button
                 onClick={() => toggleWishlist(product)}
-                className={`border p-3 rounded-lg flex items-center justify-center transition-all ${
+                className={`border p-3 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                   isLiked
                     ? 'border-luxury-accent bg-red-50 text-luxury-accent'
                     : 'border-neutral-200 hover:border-luxury-dark text-luxury-dark bg-white'
@@ -399,18 +465,18 @@ export const ProductDetails: React.FC = () => {
               </button>
             </div>
 
-            {/* Buy Now & Share */}
+            {/* Proceed to Buy & Share */}
             <div className="flex gap-4">
               <button
                 onClick={handleBuyNowClick}
                 disabled={product.stock === 0}
-                className="flex-1 bg-luxury-gold hover:bg-[#a3803b] text-white font-semibold text-[10px] uppercase tracking-widest py-3 rounded-lg transition-colors"
+                className="flex-1 bg-luxury-gold hover:bg-[#a3803b] text-white font-semibold text-[10px] uppercase tracking-widest py-3 rounded-lg transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
               >
-                Buy It Now
+                Proceed to Buy
               </button>
               <button
                 onClick={shareProduct}
-                className="border border-neutral-200 hover:border-luxury-dark text-luxury-dark px-4 py-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-white transition-colors"
+                className="border border-neutral-200 hover:border-luxury-dark text-luxury-dark px-4 py-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-white transition-colors cursor-pointer"
               >
                 <Share2 className="w-3.5 h-3.5" /> Share
               </button>
