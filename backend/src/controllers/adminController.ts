@@ -10,6 +10,19 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { cache, TTL } from '../cache/memoryCache';
 import { invalidateProductCache } from './productController';
 
+/** Fetch ALL products for admin inventory — no filters, no pagination cap */
+export async function getAllProducts(req: AuthenticatedRequest, res: Response) {
+  try {
+    const products = await ProductModel.findAll({
+      order: [['createdAt', 'DESC']],
+    });
+    return res.status(200).json({ success: true, data: products.map(p => p.get({ plain: true })) });
+  } catch (error) {
+    console.error('Admin get all products error:', error);
+    return res.status(500).json({ success: false, message: 'Server error fetching products' });
+  }
+}
+
 export async function getDashboardStats(req: AuthenticatedRequest, res: Response) {
   try {
     const cacheKey = 'admin:dashboard:stats';

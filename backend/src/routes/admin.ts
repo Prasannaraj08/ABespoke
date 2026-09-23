@@ -6,6 +6,7 @@ import {
 } from '../db/models';
 import { 
   getDashboardStats, 
+  getAllProducts,
   createProduct, 
   updateProduct, 
   deleteProduct, 
@@ -17,7 +18,7 @@ import {
 import { updateOrderStatus } from '../controllers/orderController';
 import { authenticateToken, requireAdmin } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
-import { productSchema } from '../validators/schemas';
+import { productSchema, productUpdateSchema } from '../validators/schemas';
 
 const router = Router();
 
@@ -28,9 +29,10 @@ router.use(requireAdmin);
 // Dashboard statistics
 router.get('/stats', getDashboardStats);
 
-// Product inventory adjustments (validated)
+// Product inventory management (full CRUD)
+router.get('/products', getAllProducts);
 router.post('/products', validateBody(productSchema), createProduct);
-router.put('/products/:id', validateBody(productSchema), updateProduct);
+router.put('/products/:id', validateBody(productUpdateSchema), updateProduct);
 router.delete('/products/:id', deleteProduct);
 
 // Orders management

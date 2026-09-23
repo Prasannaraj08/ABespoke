@@ -187,6 +187,7 @@ export const aiAPI = {
 
 export const adminAPI = {
   getStats: () => api.get('/admin/stats').then(getData),
+  getAllProducts: () => api.get('/admin/products').then(getData),
   createProduct: (payload: any) => api.post('/admin/products', payload).then(getData),
   updateProduct: (id: string, payload: any) => api.put(`/admin/products/${id}`, payload).then(getData),
   deleteProduct: (id: string) => api.delete(`/admin/products/${id}`).then(getData),
