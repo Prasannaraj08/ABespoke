@@ -110,13 +110,13 @@ export async function seedDatabase() {
     const initialProducts: any[] = [
       // ================= WOMEN'S CLOTHING =================
       
-      // Category: Sarees
+      // Category: Sarees (ABespoke Boutique)
       {
         id: 'w_saree_1',
         title: 'Kanjeevaram Pure Silk Saree',
-        brand: 'VedicHeritage',
-        description: 'An exquisite Kanjeevaram pure silk saree featuring intricate gold zari borders and matching pallu, crafted by master weavers in Tamil Nadu. Perfect for weddings and grand festive celebrations.',
-        price: 8999,
+        brand: 'ABespoke Boutique',
+        description: 'An authentic Kanjeevaram pure silk saree handcrafted by master weavers with pure gold zari borders. Curated exclusively for ABespoke Boutique atelier.',
+        price: 6999,
         discount: 15,
         rating: 4.9,
         reviewsCount: 124,
@@ -131,7 +131,7 @@ export async function seedDatabase() {
         stock: 25,
         fabric: 'Kanjeevaram Silk',
         fit: 'Traditional Drape',
-        occasion: 'Festive',
+        occasion: 'Festive & Wedding',
         pattern: 'Zari Woven',
         trending: true,
         createdAt: new Date().toISOString()
@@ -139,9 +139,9 @@ export async function seedDatabase() {
       {
         id: 'w_saree_2',
         title: 'Banarasi Brocade Silk Saree',
-        brand: 'VedicHeritage',
-        description: 'Traditional Banarasi brocade silk saree with gorgeous floral vines hand-loomed with gold and silver zari threads. Includes an unstitched matching blouse piece.',
-        price: 7499,
+        brand: 'ABespoke Boutique',
+        description: 'Traditional Banarasi brocade silk saree with intricate floral vine motifs hand-loomed with metallic gold threads. Sourced directly by ABespoke Boutique.',
+        price: 5499,
         discount: 10,
         rating: 4.8,
         reviewsCount: 68,
@@ -163,10 +163,10 @@ export async function seedDatabase() {
       {
         id: 'w_saree_3',
         title: 'Handcrafted Chanderi Cotton Saree',
-        brand: 'AuraStyle',
-        description: 'Lightweight and semi-sheer, this Chanderi cotton-silk blend Saree features block-print designs and a minimal gold border. Offers ultimate sophistication and comfort.',
-        price: 3499,
-        discount: 20,
+        brand: 'ABespoke Boutique',
+        description: 'Bespoke lightweight Chanderi cotton-silk saree with hand-blocked geometric borders and breathable comfort. Boutique exclusive drape.',
+        price: 2499,
+        discount: 15,
         rating: 4.6,
         reviewsCount: 92,
         sizes: ['One Size'],
@@ -179,7 +179,7 @@ export async function seedDatabase() {
         stock: 45,
         fabric: 'Chanderi Silk-Cotton',
         fit: 'Traditional Drape',
-        occasion: 'Casual Wear',
+        occasion: 'Casual Festive',
         pattern: 'Hand Block Print',
         trending: true,
         createdAt: new Date().toISOString()
@@ -187,36 +187,36 @@ export async function seedDatabase() {
       {
         id: 'w_saree_4',
         title: 'Printed Georgette Summer Saree',
-        brand: 'UrbanFlex',
-        description: 'Breezy and lightweight georgette saree featuring a modern botanical print. Drapes fluidly and requires low maintenance.',
-        price: 1899,
+        brand: 'ABespoke Boutique',
+        description: 'Lightweight fluid georgette saree featuring artistic floral digital prints. Easy-to-drape everyday luxury from ABespoke Boutique.',
+        price: 1499,
         discount: 10,
         rating: 4.4,
         reviewsCount: 145,
         sizes: ['One Size'],
         colors: ['Sky Blue', 'Sunny Yellow'],
         images: [
-          'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Sarees',
         gender: 'women',
         stock: 60,
         fabric: 'Faux Georgette',
         fit: 'Traditional Drape',
-        occasion: 'Casual',
+        occasion: 'Casual Wear',
         pattern: 'Floral Print',
         trending: false,
         createdAt: new Date().toISOString()
       },
 
-      // Category: Lehengas
+      // Category: Lehengas (Sabyasachi Label)
       {
         id: 'w_lehenga_1',
         title: 'Royal Velvet Embroidered Lehenga Set',
-        brand: 'LuxeWeave',
-        description: 'A heavy velvet lehenga set featuring detailed gold thread embroidery, a matching sequined choli, and an embellished sheer net dupatta.',
-        price: 12999,
-        discount: 15,
+        brand: 'Sabyasachi Label',
+        description: 'Haute couture bridal lehenga hand-crafted in plush royal velvet with heavy zardozi gold embroidery. From Sabyasachi Label private bridal runway.',
+        price: 8999,
+        discount: 10,
         rating: 4.9,
         reviewsCount: 38,
         sizes: ['S', 'M', 'L', 'XL'],
@@ -237,10 +237,10 @@ export async function seedDatabase() {
       {
         id: 'w_lehenga_2',
         title: 'Georgette Sequined Party Lehenga',
-        brand: 'UrbanFlex',
-        description: 'Modern lightweight georgette lehenga heavily embellished with metallic sequins. Perfect for sangeet nights and reception parties.',
-        price: 7999,
-        discount: 20,
+        brand: 'Sabyasachi Label',
+        description: 'Contemporary cocktail lehenga heavily embellished with metallic sequins and tone-on-tone embroidery. Designed by Sabyasachi Label.',
+        price: 5999,
+        discount: 15,
         rating: 4.7,
         reviewsCount: 52,
         sizes: ['S', 'M', 'L'],
@@ -253,7 +253,7 @@ export async function seedDatabase() {
         stock: 20,
         fabric: 'Georgette & Net',
         fit: 'Flared Fit',
-        occasion: 'Festive',
+        occasion: 'Sangeet & Reception',
         pattern: 'Sequined',
         trending: true,
         createdAt: new Date().toISOString()
@@ -261,9 +261,9 @@ export async function seedDatabase() {
       {
         id: 'w_lehenga_3',
         title: 'Floral Silk Festive Lehenga Choli',
-        brand: 'AuraStyle',
-        description: 'Art silk digital print lehenga with dynamic floral prints and a contrasting borders. Gives a youthful, modern look.',
-        price: 5999,
+        brand: 'Sabyasachi Label',
+        description: 'Digital art silk lehenga choli featuring heritage floral motifs, embellished waistband, and lightweight dupatta by Sabyasachi Label.',
+        price: 4999,
         discount: 10,
         rating: 4.5,
         reviewsCount: 41,
@@ -277,17 +277,17 @@ export async function seedDatabase() {
         stock: 22,
         fabric: 'Art Silk',
         fit: 'Regular Flared',
-        occasion: 'Festive',
-        pattern: 'Digital Print',
+        occasion: 'Festive & Mehndi',
+        pattern: 'Heritage Floral',
         trending: false,
         createdAt: new Date().toISOString()
       },
       {
         id: 'w_lehenga_4',
         title: 'Organza Pastel Designer Lehenga',
-        brand: 'LuxeWeave',
-        description: 'Dreamy pastel organza lehenga choli set featuring delicate floral embroidery and a sheer ruffle dupatta.',
-        price: 9499,
+        brand: 'Sabyasachi Label',
+        description: 'Dreamy pastel organza lehenga set adorned with delicate French wire embroidery and ruffled dupatta from Sabyasachi Label summer collection.',
+        price: 6999,
         discount: 15,
         rating: 4.8,
         reviewsCount: 30,
@@ -301,19 +301,19 @@ export async function seedDatabase() {
         stock: 18,
         fabric: 'Premium Organza',
         fit: 'A-Line Flared',
-        occasion: 'Wedding',
+        occasion: 'Wedding Guest',
         pattern: 'Thread Embroidery',
         trending: false,
         createdAt: new Date().toISOString()
       },
 
-      // Category: Hoodies (Women)
+      // Category: Hoodies (ABespoke Boutique)
       {
         id: 'w_hoodie_1',
         title: 'Cashmere Blend Knit Hoodie',
-        brand: 'AuraStyle',
-        description: 'An incredibly soft oversized knit hoodie made from a premium cotton-cashmere blend. Features drop shoulders and side slit hems.',
-        price: 3499,
+        brand: 'ABespoke Boutique',
+        description: 'Ultra-soft oversized knit hoodie crafted from a luxury cotton-cashmere blend. ABespoke Boutique premium knitwear.',
+        price: 2499,
         discount: 10,
         rating: 4.8,
         reviewsCount: 165,
@@ -336,10 +336,10 @@ export async function seedDatabase() {
       {
         id: 'w_hoodie_2',
         title: 'Crop Fleece Athletic Hoodie',
-        brand: 'ApexAthletics',
-        description: 'High-performance crop hoodie featuring super-soft brushed fleece lining, moisture-wicking capability, and adjustable toggles.',
-        price: 1999,
-        discount: 15,
+        brand: 'ABespoke Boutique',
+        description: 'Soft brushed-fleece crop hoodie featuring clean tailored seams and adjustable toggles by ABespoke Boutique.',
+        price: 1499,
+        discount: 10,
         rating: 4.6,
         reviewsCount: 198,
         sizes: ['S', 'M', 'L'],
@@ -353,7 +353,7 @@ export async function seedDatabase() {
         fabric: 'Cotton-Polyester Fleece',
         sleeve: 'Full Sleeve',
         fit: 'Cropped Relaxed',
-        occasion: 'Sportswear',
+        occasion: 'Casual Sportswear',
         pattern: 'Solid',
         trending: false,
         createdAt: new Date().toISOString()
@@ -361,10 +361,10 @@ export async function seedDatabase() {
       {
         id: 'w_hoodie_3',
         title: 'Premium French Terry Hoodie',
-        brand: 'UrbanFlex',
-        description: 'Mediumweight organic cotton French Terry hoodie. Features a double-layered hood, flatlock stitching, and convenient kangaroo pocket.',
-        price: 2499,
-        discount: 20,
+        brand: 'ABespoke Boutique',
+        description: 'Organic heavy cotton French Terry hoodie with lined hood and precision flatlock stitching. ABespoke Boutique essential line.',
+        price: 1999,
+        discount: 15,
         rating: 4.5,
         reviewsCount: 110,
         sizes: ['S', 'M', 'L', 'XL'],
@@ -386,9 +386,9 @@ export async function seedDatabase() {
       {
         id: 'w_hoodie_4',
         title: 'Active zip-up Running Hoodie',
-        brand: 'ApexAthletics',
-        description: 'Slim-fit athletic hoodie featuring a full zipper front, thumbhole sleeves, and reflection strips for safe early morning running.',
-        price: 2299,
+        brand: 'ABespoke Boutique',
+        description: 'Slim tailored athletic hoodie with full zipper entry and moisture-management tech fabric from ABespoke Boutique.',
+        price: 1499,
         discount: 10,
         rating: 4.7,
         reviewsCount: 88,
@@ -403,19 +403,19 @@ export async function seedDatabase() {
         fabric: 'Polyester-Elastane Tech',
         sleeve: 'Full Sleeve',
         fit: 'Slim Fit',
-        occasion: 'Sportswear',
+        occasion: 'Active Casual',
         pattern: 'Solid',
         trending: true,
         createdAt: new Date().toISOString()
       },
 
-      // Category: Half Sarees
+      // Category: Half Sarees (ABespoke Boutique)
       {
         id: 'w_halfsaree_1',
         title: 'Kanchipuram Silk Half Saree Set',
-        brand: 'VedicHeritage',
-        description: 'A traditional South Indian Pavadai Davani set. Features a pure silk zari pleated skirt, embellished raw silk blouse, and silk georgette dhavani dupatta.',
-        price: 6599,
+        brand: 'ABespoke Boutique',
+        description: 'Traditional South Indian Pavadai Davani set with pure silk pleated skirt, embellished raw silk blouse, and silk dhavani veil by ABespoke Boutique.',
+        price: 4999,
         discount: 15,
         rating: 4.9,
         reviewsCount: 45,
@@ -437,9 +437,9 @@ export async function seedDatabase() {
       {
         id: 'w_halfsaree_2',
         title: 'Georgette Sequined Half Saree',
-        brand: 'UrbanFlex',
-        description: 'A modern design half Saree set featuring lightweight georgette materials and sparkling borders. Trendy look for wedding sangeets.',
-        price: 4999,
+        brand: 'ABespoke Boutique',
+        description: 'Bespoke modern Half Saree set crafted in lightweight georgette with shimmering border highlights by ABespoke Boutique.',
+        price: 3499,
         discount: 10,
         rating: 4.6,
         reviewsCount: 33,
@@ -461,10 +461,10 @@ export async function seedDatabase() {
       {
         id: 'w_halfsaree_3',
         title: 'Banarasi Brocade Half Saree',
-        brand: 'VedicHeritage',
-        description: 'Vibrant Banarasi brocade woven pavadai set with a matching heavy silk blouse and a contrasting net dhavani veil.',
-        price: 5899,
-        discount: 20,
+        brand: 'ABespoke Boutique',
+        description: 'Vibrant Banarasi brocade woven pavadai set with rich silk blouse piece and matching veil. Custom tailored at ABespoke Boutique atelier.',
+        price: 4499,
+        discount: 15,
         rating: 4.8,
         reviewsCount: 29,
         sizes: ['M', 'L', 'XL'],
@@ -477,7 +477,7 @@ export async function seedDatabase() {
         stock: 10,
         fabric: 'Banarasi Silk Blend',
         fit: 'Traditional Flared',
-        occasion: 'Festive',
+        occasion: 'Festive Celebrations',
         pattern: 'Brocade Woven',
         trending: true,
         createdAt: new Date().toISOString()
@@ -485,9 +485,9 @@ export async function seedDatabase() {
       {
         id: 'w_halfsaree_4',
         title: 'Floral Print Organza Half Saree',
-        brand: 'AuraStyle',
-        description: 'Beautifully light pastel organza pavadai set featuring digital floral prints and a clean border layout.',
-        price: 3999,
+        brand: 'ABespoke Boutique',
+        description: 'Pastel organza pavadai set with delicate floral prints and lightweight drape. ABespoke Boutique custom collection.',
+        price: 2999,
         discount: 10,
         rating: 4.4,
         reviewsCount: 22,
@@ -507,13 +507,13 @@ export async function seedDatabase() {
         createdAt: new Date().toISOString()
       },
 
-      // Category: Kurtis
+      // Category: Kurtis (ABespoke Boutique)
       {
         id: 'w_kurti_1',
         title: 'Chikankari Hand Embroidered Kurti',
-        brand: 'VedicHeritage',
-        description: 'A beautiful georgette kurti displaying Lucknowi Chikankari hand embroidery. Gives an elegant, airy, and traditional feel.',
-        price: 2499,
+        brand: 'ABespoke Boutique',
+        description: 'Authentic Lucknowi Chikankari hand-embroidered georgette tunic with intricate needlework, tailored by ABespoke master tailors.',
+        price: 1999,
         discount: 15,
         rating: 4.8,
         reviewsCount: 210,
@@ -537,16 +537,16 @@ export async function seedDatabase() {
       {
         id: 'w_kurti_2',
         title: 'Anarkali flared Cotton Kurti',
-        brand: 'AuraStyle',
-        description: 'Made from premium breathable organic cotton, this Kurti features a flared Anarkali silhouette and minimal floral print detailing.',
-        price: 1899,
+        brand: 'ABespoke Boutique',
+        description: 'Bespoke flared Anarkali kurti crafted from breathable 100% organic cotton with subtle floral print accents. ABespoke Boutique atelier.',
+        price: 1499,
         discount: 10,
         rating: 4.5,
         reviewsCount: 144,
         sizes: ['S', 'M', 'L', 'XL'],
         colors: ['Indigo Blue', 'Turquoise Green'],
         images: [
-          'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1589810635657-232948472d98?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Kurtis',
         gender: 'women',
@@ -554,7 +554,7 @@ export async function seedDatabase() {
         fabric: '100% Organic Cotton',
         sleeve: '3/4 Sleeve',
         fit: 'Anarkali Flared',
-        occasion: 'Casual Wear',
+        occasion: 'Casual Daily',
         pattern: 'Floral Print',
         trending: false,
         createdAt: new Date().toISOString()
@@ -562,16 +562,16 @@ export async function seedDatabase() {
       {
         id: 'w_kurti_3',
         title: 'Designer Tunic length Kurti',
-        brand: 'UrbanFlex',
-        description: 'A contemporary short tunic-style kurti featuring side pockets, asymmetrical button cuffs, and a neat Mandarin collar.',
-        price: 1299,
-        discount: 20,
+        brand: 'ABespoke Boutique',
+        description: 'Contemporary short tunic kurti featuring neat Mandarin collar, side pockets, and relaxed linen silhouette by ABespoke Boutique.',
+        price: 999,
+        discount: 10,
         rating: 4.3,
         reviewsCount: 98,
         sizes: ['XS', 'S', 'M', 'L', 'XL'],
         colors: ['Mustard Yellow', 'Brick Red'],
         images: [
-          'https://images.unsplash.com/photo-1608748010899-18f300247112?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Kurtis',
         gender: 'women',
@@ -579,7 +579,7 @@ export async function seedDatabase() {
         fabric: 'Linen Cotton Blend',
         sleeve: 'Roll-up Sleeve',
         fit: 'Straight Tunic',
-        occasion: 'Daily Wear',
+        occasion: 'Daily Office Wear',
         pattern: 'Solid Colored',
         trending: false,
         createdAt: new Date().toISOString()
@@ -587,16 +587,16 @@ export async function seedDatabase() {
       {
         id: 'w_kurti_4',
         title: 'Premium Chanderi Silk Tunic Kurti',
-        brand: 'LuxeWeave',
-        description: 'Woven with fine gold threads, this Chanderi silk kurti features delicate hand embroideries around the neckline.',
-        price: 3299,
+        brand: 'ABespoke Boutique',
+        description: 'Fine Chanderi silk tunic kurti with subtle zari thread highlights around neckline and cuffs. ABespoke Boutique festive line.',
+        price: 2499,
         discount: 15,
         rating: 4.7,
         reviewsCount: 77,
         sizes: ['S', 'M', 'L', 'XL'],
         colors: ['Teal Blue', 'Warm Peach'],
         images: [
-          'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Kurtis',
         gender: 'women',
@@ -604,7 +604,7 @@ export async function seedDatabase() {
         fabric: 'Chanderi Silk',
         sleeve: '3/4 Sleeve',
         fit: 'Regular Straight',
-        occasion: 'Festive',
+        occasion: 'Festive Gathering',
         pattern: 'Neckline Hand Embroidery',
         trending: true,
         createdAt: new Date().toISOString()
@@ -612,13 +612,13 @@ export async function seedDatabase() {
 
       // ================= MEN'S CLOTHING =================
       
-      // Category: Shirts
+      // Category: Shirts (ABespoke Boutique)
       {
         id: 'm_shirt_1',
         title: 'Classic Slim Fit Oxford Shirt',
-        brand: 'LuxeWeave',
-        description: 'Crafted from premium 100% long-staple cotton, this classic Oxford shirt is breathable, crisp, and features a clean button-down collar.',
-        price: 2499,
+        brand: 'ABespoke Boutique',
+        description: 'Bespoke tailored Oxford shirt in 100% long-staple cotton featuring button-down collar and mother-of-pearl buttons by ABespoke master tailors.',
+        price: 1499,
         discount: 15,
         rating: 4.6,
         reviewsCount: 142,
@@ -626,7 +626,7 @@ export async function seedDatabase() {
         colors: ['White', 'Light Blue', 'Pink'],
         images: [
           'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&auto=format&fit=crop&q=80',
-          'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=600&auto=format&fit=crop&q=80'
+          'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&auto=format&fit=crop&q=80'
         ],
         category: 'Shirts',
         gender: 'men',
@@ -634,18 +634,18 @@ export async function seedDatabase() {
         fabric: '100% Cotton Oxford',
         sleeve: 'Full Sleeve',
         fit: 'Slim Fit',
-        occasion: 'Semi-Formal',
-        pattern: 'Solid',
+        occasion: 'Business Casual',
+        pattern: 'Solid Oxford',
         trending: true,
         createdAt: new Date().toISOString()
       },
       {
         id: 'm_shirt_2',
         title: 'Striped Cotton Pique Polo Shirt',
-        brand: 'LuxeWeave',
-        description: 'Signature knit pique cotton polo featuring crisp stripes, double button placket, and ribbed cuffs. Lightweight and stylish.',
-        price: 1799,
-        discount: 15,
+        brand: 'ABespoke Boutique',
+        description: 'Premium knit pique cotton polo with contrast stripe collar and tailored sleeve cuffs. ABespoke Boutique smart casual collection.',
+        price: 1199,
+        discount: 10,
         rating: 4.4,
         reviewsCount: 78,
         sizes: ['M', 'L', 'XL'],
@@ -659,7 +659,7 @@ export async function seedDatabase() {
         fabric: '100% Pique Cotton',
         sleeve: 'Half Sleeve',
         fit: 'Regular Fit',
-        occasion: 'Casual',
+        occasion: 'Weekend Casual',
         pattern: 'Striped',
         trending: false,
         createdAt: new Date().toISOString()
@@ -667,9 +667,9 @@ export async function seedDatabase() {
       {
         id: 'm_shirt_3',
         title: 'Breathable Casual Linen Shirt',
-        brand: 'UrbanFlex',
-        description: 'Made from 100% organic European flax linen, this shirt features a relaxed fit and single patch pocket.',
-        price: 2999,
+        brand: 'ABespoke Boutique',
+        description: 'Pure French flax linen button-down shirt with spread collar and clean hemline. ABespoke Boutique resort edition.',
+        price: 1799,
         discount: 10,
         rating: 4.5,
         reviewsCount: 64,
@@ -681,10 +681,10 @@ export async function seedDatabase() {
         category: 'Shirts',
         gender: 'men',
         stock: 35,
-        fabric: '100% Flax Linen',
+        fabric: '100% Pure Linen',
         sleeve: 'Full Sleeve',
         fit: 'Relaxed Fit',
-        occasion: 'Casual',
+        occasion: 'Resort & Casual',
         pattern: 'Solid Linen',
         trending: false,
         createdAt: new Date().toISOString()
@@ -692,9 +692,9 @@ export async function seedDatabase() {
       {
         id: 'm_shirt_4',
         title: 'Premium Herringbone Dress Shirt',
-        brand: 'LuxeWeave',
-        description: 'A high-end double-ply cotton dress shirt with a subtle herringbone weave pattern and french cuffs.',
-        price: 3999,
+        brand: 'ABespoke Boutique',
+        description: 'Fine double-ply Egyptian cotton dress shirt with subtle herringbone texture and French cuffs. Hand-finished at ABespoke Boutique atelier.',
+        price: 2299,
         discount: 10,
         rating: 4.8,
         reviewsCount: 40,
@@ -709,19 +709,19 @@ export async function seedDatabase() {
         fabric: 'Double-Ply Cotton',
         sleeve: 'Full Sleeve',
         fit: 'Tailored Fit',
-        occasion: 'Formal',
+        occasion: 'Formal & Black Tie',
         pattern: 'Herringbone',
         trending: true,
         createdAt: new Date().toISOString()
       },
 
-      // Category: Pants
+      // Category: Pants (ABespoke Boutique)
       {
         id: 'm_pant_1',
         title: 'Tech Stretch Chino Trousers',
-        brand: 'UrbanFlex',
-        description: 'Chino pants engineered with lightweight 4-way stretch fabric that is water-resistant. Concealed zipper pockets and comfortable flex waistband.',
-        price: 2999,
+        brand: 'ABespoke Boutique',
+        description: 'Tailored stretch chino trousers with water-repellent finish, flex waistband, and concealed pocket. ABespoke Boutique modern tailoring.',
+        price: 1999,
         discount: 10,
         rating: 4.3,
         reviewsCount: 65,
@@ -733,7 +733,7 @@ export async function seedDatabase() {
         category: 'Pants',
         gender: 'men',
         stock: 35,
-        fabric: 'Polyester-Elastane Blend',
+        fabric: 'Cotton-Elastane Stretch',
         fit: 'Slim Tapered',
         occasion: 'Smart Casual',
         pattern: 'Solid',
@@ -743,9 +743,9 @@ export async function seedDatabase() {
       {
         id: 'm_pant_2',
         title: 'Tailored Wool-Blend Dress Pants',
-        brand: 'LuxeWeave',
-        description: 'Elegant tailored dress pants made from a fine wool blend. Flat front styling with side adjusters and unfinished hems for custom tailoring.',
-        price: 4999,
+        brand: 'ABespoke Boutique',
+        description: 'Flat-front formal trousers crafted in fine Italian wool-blend with side adjusters and hand-finished hems by ABespoke tailors.',
+        price: 2999,
         discount: 15,
         rating: 4.7,
         reviewsCount: 33,
@@ -759,7 +759,7 @@ export async function seedDatabase() {
         stock: 20,
         fabric: 'Wool-Polyester Blend',
         fit: 'Slim Fit',
-        occasion: 'Formal',
+        occasion: 'Formal Business',
         pattern: 'Solid',
         trending: true,
         createdAt: new Date().toISOString()
@@ -767,9 +767,9 @@ export async function seedDatabase() {
       {
         id: 'm_pant_3',
         title: 'Pleated Cotton Comfort Trousers',
-        brand: 'AuraStyle',
-        description: 'Classic double-pleated cotton trousers offering a relaxed, comfortable seat and thigh. Ideal for smart office wear.',
-        price: 2299,
+        brand: 'ABespoke Boutique',
+        description: 'Double-pleated twill cotton trousers offering classic elegance and comfortable seat. ABespoke Boutique sartorial collection.',
+        price: 1499,
         discount: 10,
         rating: 4.4,
         reviewsCount: 48,
@@ -783,7 +783,7 @@ export async function seedDatabase() {
         stock: 45,
         fabric: '100% Twill Cotton',
         fit: 'Relaxed Fit',
-        occasion: 'Formal',
+        occasion: 'Office Casual',
         pattern: 'Solid',
         trending: false,
         createdAt: new Date().toISOString()
@@ -791,10 +791,10 @@ export async function seedDatabase() {
       {
         id: 'm_pant_4',
         title: 'Summer Linen Cargo Pants',
-        brand: 'UrbanFlex',
-        description: 'Breathable linen-blend casual cargo trousers featuring an elasticated drawstring waistband and pocket layouts.',
-        price: 2799,
-        discount: 15,
+        brand: 'ABespoke Boutique',
+        description: 'Breathable linen-cotton relaxed cargo pants with drawstring waistband and tailored pocket profile from ABespoke Boutique.',
+        price: 1799,
+        discount: 10,
         rating: 4.5,
         reviewsCount: 50,
         sizes: ['30', '32', '34', '36'],
@@ -807,20 +807,20 @@ export async function seedDatabase() {
         stock: 40,
         fabric: 'Linen Cotton Blend',
         fit: 'Loose Casual Fit',
-        occasion: 'Casual',
+        occasion: 'Travel & Casual',
         pattern: 'Solid',
         trending: false,
         createdAt: new Date().toISOString()
       },
 
-      // Category: Hoodies (Men)
+      // Category: Hoodies (ABespoke Boutique)
       {
         id: 'm_hoodie_1',
         title: 'Classic French Terry Loopback Hoodie',
-        brand: 'AuraStyle',
-        description: 'Made from heavyweight French Terry, this premium hoodie offers maximum comfort and style. Equipped with double-layered hood.',
-        price: 3499,
-        discount: 25,
+        brand: 'ABespoke Boutique',
+        description: 'Heavyweight organic cotton loopback hoodie with double-lined hood and tailored raglan shoulders by ABespoke Boutique.',
+        price: 2299,
+        discount: 15,
         rating: 4.7,
         reviewsCount: 198,
         sizes: ['S', 'M', 'L', 'XL'],
@@ -834,7 +834,7 @@ export async function seedDatabase() {
         fabric: '100% French Terry Cotton',
         sleeve: 'Full Sleeve',
         fit: 'Regular Fit',
-        occasion: 'Casual',
+        occasion: 'Everyday Casual',
         pattern: 'Solid',
         trending: true,
         createdAt: new Date().toISOString()
@@ -842,9 +842,9 @@ export async function seedDatabase() {
       {
         id: 'm_hoodie_2',
         title: 'Premium Knit Cashmere Hoodie',
-        brand: 'LuxeWeave',
-        description: 'An elegant sweater knit hoodie crafted from ultra-soft wool-cashmere blend. Offers premium luxury lounging look.',
-        price: 6999,
+        brand: 'ABespoke Boutique',
+        description: 'Bespoke wool-cashmere sweater knit hoodie offering ultra-fine hand feel and refined loungewear look from ABespoke Boutique.',
+        price: 3999,
         discount: 10,
         rating: 4.9,
         reviewsCount: 35,
@@ -859,7 +859,7 @@ export async function seedDatabase() {
         fabric: '90% Wool, 10% Cashmere',
         sleeve: 'Full Sleeve',
         fit: 'Tailored Knit Fit',
-        occasion: 'Casual',
+        occasion: 'Luxury Lounge',
         pattern: 'Ribbed Knit',
         trending: true,
         createdAt: new Date().toISOString()
@@ -867,9 +867,9 @@ export async function seedDatabase() {
       {
         id: 'm_hoodie_3',
         title: 'Athletic Tech Zip-Up Hoodie',
-        brand: 'ApexAthletics',
-        description: 'Lightweight workout hoodie with full zipper entry, side zipper pockets, and quick-dry sweat technology.',
-        price: 2199,
+        brand: 'ABespoke Boutique',
+        description: 'Lightweight high-stretch performance hoodie with zippered pockets and quick-dry breathability from ABespoke Boutique.',
+        price: 1699,
         discount: 15,
         rating: 4.5,
         reviewsCount: 104,
@@ -884,7 +884,7 @@ export async function seedDatabase() {
         fabric: 'Polyester-Elastane Tech',
         sleeve: 'Full Sleeve',
         fit: 'Athletic Fit',
-        occasion: 'Sportswear',
+        occasion: 'Active Casual',
         pattern: 'Solid',
         trending: false,
         createdAt: new Date().toISOString()
@@ -892,10 +892,10 @@ export async function seedDatabase() {
       {
         id: 'm_hoodie_4',
         title: 'Graphic Oversized Cotton Hoodie',
-        brand: 'UrbanFlex',
-        description: 'Streetwear-inspired graphic hoodie made from ultra-heavy cotton. Ribbed cuffs and double drawcords.',
-        price: 2799,
-        discount: 20,
+        brand: 'ABespoke Boutique',
+        description: 'Streetwear-inspired heavy cotton hoodie featuring minimalist atelier graphics and ribbed hems by ABespoke Boutique.',
+        price: 1799,
+        discount: 15,
         rating: 4.6,
         reviewsCount: 88,
         sizes: ['M', 'L', 'XL'],
@@ -909,19 +909,19 @@ export async function seedDatabase() {
         fabric: '100% Heavy Cotton',
         sleeve: 'Full Sleeve',
         fit: 'Oversized Fit',
-        occasion: 'Casual',
+        occasion: 'Streetwear',
         pattern: 'Printed Graphic',
         trending: false,
         createdAt: new Date().toISOString()
       },
 
-      // Category: Blazers
+      // Category: Blazers (Sabyasachi Label)
       {
         id: 'm_blazer_1',
         title: 'Italian Tweed Single-Breasted Blazer',
-        brand: 'LuxeWeave',
-        description: 'A masterfully tailored single-breasted blazer featuring a premium Italian tweed wool-blend shell. Equipped with real horn buttons and double vents.',
-        price: 9999,
+        brand: 'Sabyasachi Label',
+        description: 'Masterfully tailored single-breasted blazer in Italian tweed wool-blend with genuine horn buttons. Exclusive Sabyasachi Label collection.',
+        price: 6499,
         discount: 15,
         rating: 4.9,
         reviewsCount: 42,
@@ -936,7 +936,7 @@ export async function seedDatabase() {
         fabric: '70% Wool, 30% Polyester Tweed',
         sleeve: 'Full Sleeve',
         fit: 'Tailored Fit',
-        occasion: 'Formal',
+        occasion: 'Formal Gala',
         pattern: 'Textured Tweed',
         trending: true,
         createdAt: new Date().toISOString()
@@ -944,9 +944,9 @@ export async function seedDatabase() {
       {
         id: 'm_blazer_2',
         title: 'Linen Summer Casual Blazer',
-        brand: 'UrbanFlex',
-        description: 'Unstructured and partially lined casual blazer tailored in breathable lightweight pure linen. Perfect for destination weddings.',
-        price: 5499,
+        brand: 'Sabyasachi Label',
+        description: 'Unstructured single-breasted blazer tailored in pure European linen. Lightweight and refined from Sabyasachi Label resort collection.',
+        price: 3999,
         discount: 10,
         rating: 4.6,
         reviewsCount: 39,
@@ -969,10 +969,10 @@ export async function seedDatabase() {
       {
         id: 'm_blazer_3',
         title: 'Classic Wool Flannel Suit Blazer',
-        brand: 'LuxeWeave',
-        description: 'Double-breasted flannel suit blazer woven with fine wool fibers. Traditional notch lapel and flap pockets.',
-        price: 11999,
-        discount: 20,
+        brand: 'Sabyasachi Label',
+        description: 'Double-breasted flannel suit blazer tailored in fine Merino wool with peak lapels from Sabyasachi Label couture menswear line.',
+        price: 7999,
+        discount: 15,
         rating: 4.8,
         reviewsCount: 26,
         sizes: ['40', '42', '44'],
@@ -986,7 +986,7 @@ export async function seedDatabase() {
         fabric: '100% Merino Wool Flannel',
         sleeve: 'Full Sleeve',
         fit: 'Classic Double-Breasted',
-        occasion: 'Formal',
+        occasion: 'Black Tie & Wedding',
         pattern: 'Solid Flannel',
         trending: true,
         createdAt: new Date().toISOString()
@@ -994,9 +994,9 @@ export async function seedDatabase() {
       {
         id: 'm_blazer_4',
         title: 'Cotton Stretch Smart-Casual Blazer',
-        brand: 'AuraStyle',
-        description: 'Modern knit-style stretch cotton blazer. Offers ultimate comfort of a sweater but gives a structured sharp shoulder line.',
-        price: 4599,
+        brand: 'Sabyasachi Label',
+        description: 'Modern stretch knit cotton blazer engineered with natural shoulder line and flexible movement by Sabyasachi Label.',
+        price: 3499,
         discount: 10,
         rating: 4.4,
         reviewsCount: 53,
@@ -1011,20 +1011,20 @@ export async function seedDatabase() {
         fabric: '95% Cotton, 5% Lycra',
         sleeve: 'Full Sleeve',
         fit: 'Slim Fit',
-        occasion: 'Semi-Formal',
+        occasion: 'Semi-Formal Evening',
         pattern: 'Solid Stretch',
         trending: false,
         createdAt: new Date().toISOString()
       },
 
-      // Category: Jeans
+      // Category: Jeans (Sabyasachi Label)
       {
         id: 'm_jeans_1',
         title: 'Vintage Wash Selvedge Jeans',
-        brand: 'DenimCo',
-        description: 'Straight-leg selvedge denim woven on vintage shuttle looms. Featuring a natural indigo wash and classic copper rivets.',
-        price: 4999,
-        discount: 20,
+        brand: 'Sabyasachi Label',
+        description: 'Straight-leg Japanese selvedge denim woven on shuttle looms with hand-applied vintage whiskering. Sabyasachi Label denim edition.',
+        price: 2999,
+        discount: 15,
         rating: 4.5,
         reviewsCount: 88,
         sizes: ['30', '32', '34', '36'],
@@ -1045,9 +1045,9 @@ export async function seedDatabase() {
       {
         id: 'm_jeans_2',
         title: 'Slim Fit Distressed Black Jeans',
-        brand: 'DenimCo',
-        description: 'Soft stretch-denim black jeans with custom distressed slash details on knees. Breathable, comfortable, and highly durable.',
-        price: 2999,
+        brand: 'Sabyasachi Label',
+        description: 'Black stretch denim jeans featuring custom distressed slash knee details and matte black hardware from Sabyasachi Label.',
+        price: 1999,
         discount: 15,
         rating: 4.6,
         reviewsCount: 165,
@@ -1061,17 +1061,17 @@ export async function seedDatabase() {
         stock: 60,
         fabric: '98% Cotton, 2% Spandex Stretch',
         fit: 'Slim Tapered',
-        occasion: 'Casual',
-        pattern: 'Distressed',
+        occasion: 'Casual Street',
+        pattern: 'Distressed Black',
         trending: true,
         createdAt: new Date().toISOString()
       },
       {
         id: 'm_jeans_3',
         title: 'Loose Fit Utility Carpenter Jeans',
-        brand: 'UrbanFlex',
-        description: 'Vintage carpenter style loose-fit denim pants featuring side hammer loop, custom tool pockets, and triple-stitch seams.',
-        price: 3499,
+        brand: 'Sabyasachi Label',
+        description: 'Heavyweight rigid denim carpenter pants featuring side tool pockets and contrast triple-stitch seams by Sabyasachi Label.',
+        price: 2299,
         discount: 10,
         rating: 4.3,
         reviewsCount: 74,
@@ -1086,16 +1086,16 @@ export async function seedDatabase() {
         fabric: '100% Rigid Heavyweight Cotton Denim',
         fit: 'Loose Carpenter Fit',
         occasion: 'Casual Streetwear',
-        pattern: 'Solid Stonewash',
+        pattern: 'Stonewash',
         trending: false,
         createdAt: new Date().toISOString()
       },
       {
         id: 'm_jeans_4',
         title: 'Premium Raw Indigo Rigid Jeans',
-        brand: 'DenimCo',
-        description: 'Unwashed stiff raw denim jeans. Features dark copper stitching, branded waist patch, and button fly. Fades uniquely to your wear.',
-        price: 5499,
+        brand: 'Sabyasachi Label',
+        description: 'Unwashed stiff raw indigo denim with button fly and copper rivets. Fades uniquely with wear. Sabyasachi Label premium denim.',
+        price: 3499,
         discount: 10,
         rating: 4.8,
         reviewsCount: 52,
@@ -1109,7 +1109,7 @@ export async function seedDatabase() {
         stock: 30,
         fabric: '100% Selvedge Indigo Denim',
         fit: 'Regular Straight',
-        occasion: 'Casual',
+        occasion: 'Casual Premium',
         pattern: 'Raw Solid',
         trending: true,
         createdAt: new Date().toISOString()
@@ -1122,7 +1122,8 @@ export async function seedDatabase() {
         ...initialProducts[0], // w_saree_1
         id: 'w_saree_dup_5',
         title: 'Handloom Tussar Silk Saree',
-        price: 6899,
+        brand: 'ABespoke Boutique',
+        price: 4499,
         discount: 10,
         trending: false,
         createdAt: new Date().toISOString()
@@ -1131,8 +1132,9 @@ export async function seedDatabase() {
         ...initialProducts[8], // w_hoodie_1
         id: 'w_hoodie_dup_5',
         title: 'French Terry Sherpa Lined Hoodie',
-        price: 3999,
-        discount: 15,
+        brand: 'ABespoke Boutique',
+        price: 2799,
+        discount: 10,
         trending: false,
         createdAt: new Date().toISOString()
       }
