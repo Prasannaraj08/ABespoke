@@ -18,7 +18,7 @@ const categoryBanners: Record<string, { title: string; desc: string; image: stri
   'Hoodies': {
     title: 'Premium Hoodies',
     desc: 'Oversized fleece, cashmere blends, and sporty silhouettes for daily premium comfort.',
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1600&auto=format&fit=crop&q=80'
+    image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1600&auto=format&fit=crop&q=80'
   },
   'Half Sarees': {
     title: 'Traditional Half Sarees',

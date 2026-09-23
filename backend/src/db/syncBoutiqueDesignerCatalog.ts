@@ -313,7 +313,7 @@ const CATALOG_DEFINITIONS: Record<string, ProductSpec> = {
     occasion: 'Casual Lounge',
     pattern: 'Solid Knit',
     images: [
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80'
+      'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&auto=format&fit=crop&q=80'
     ]
   },
   'Crop Fleece Athletic Hoodie': {
